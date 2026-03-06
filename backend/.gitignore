@@ -1,0 +1,41 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Temporary Files
+uploads/temp/
+*.tmp
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Production Build
+dist/
+build/
+*.gz
+
+# Testing
+coverage/
+.nyc_output/
+
+# Cloudinary API Secret (extra precaution)
+# Never commit anything with API credentials
+cloudinary-config.js
