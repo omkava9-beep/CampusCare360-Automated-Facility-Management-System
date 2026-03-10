@@ -3,7 +3,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { AdminSignup, LoginAdmin, isAdmin } = require('../middleware/auth');
-const { createUser, updateState, downloadLocationQR, createLocation } = require('../controllers/adminControllers');
+const { createUser, updateState, downloadLocationQR, createLocation, getUsersByRole, getAllLocations, getContractorDetailedStats } = require('../controllers/adminControllers');
 const { addGrievance, uploadGrievancePhoto, uploadResolvedPhoto, getGrievancePhotos, deleteGrievancePhoto } = require('../controllers/userController');
 const { authenticateToken } = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -18,12 +18,15 @@ const { getAssignedGrievances: getContractorGrievances, getGrievanceDetail: getC
 const { getDashboardStats, getAllGrievances, getGrievancesByLocation, getGrievanceForApproval, approveGrievance, rejectGrievance, getPendingApprovals } = require('../controllers/dashboardControllers');
 
 // ============= ADMIN ROUTES =============
-routes.post('/admin/signup' , AdminSignup);
-routes.post('/admin/login' , LoginAdmin);
-routes.post('/admin/createuser' , isAdmin , createUser)
-routes.put('/admin/stateupdate' , isAdmin , updateState);
-routes.post('/admin/createlocation' , isAdmin , createLocation);
-routes.get('/admin/downloadqr/:locationId' , downloadLocationQR);
+routes.post('/admin/signup', AdminSignup);
+routes.post('/admin/login', LoginAdmin);
+routes.post('/admin/createuser', isAdmin, createUser)
+routes.put('/admin/stateupdate', isAdmin, updateState);
+routes.post('/admin/createlocation', isAdmin, createLocation);
+routes.get('/admin/downloadqr/:locationId', downloadLocationQR);
+routes.get('/admin/users/:role', isAdmin, getUsersByRole);
+routes.get('/admin/locations', isAdmin, getAllLocations);
+routes.get('/admin/users/contractor/:userId/stats', isAdmin, getContractorDetailedStats);
 
 // Admin Dashboard Routes
 routes.get('/admin/dashboard/stats', isAdmin, getDashboardStats);
@@ -59,4 +62,4 @@ routes.put('/contractor/profile', authenticateToken, updateContractorProfile);
 routes.post('/contractor/profile-picture', authenticateToken, upload.single('photo'), uploadContractorProfile);
 routes.post('/contractor/change-password', authenticateToken, contractorChangePassword);
 
-module.exports =  routes
+module.exports = routes

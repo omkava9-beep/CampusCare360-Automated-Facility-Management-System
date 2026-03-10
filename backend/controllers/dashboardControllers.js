@@ -18,35 +18,76 @@ exports.getDashboardStats = async (req, res) => {
         const totalContractors = await User.countDocuments({ role: 'contractor' });
         const totalStudents = await User.countDocuments({ role: 'student' });
 
+        // Location Distribution
         const grievancesByLocation = await GrieVance.aggregate([
             {
                 $group: {
                     _id: '$locationId',
                     count: { $sum: 1 },
-                    statusBreakdown: {
-                        applied: {
-                            $sum: { $cond: [{ $eq: ['$status', 'applied'] }, 1, 0] }
-                        },
-                        inProgress: {
-                            $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] }
-                        },
-                        done: {
-                            $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] }
-                        },
-                        resolved: {
-                            $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] }
-                        }
-                    }
+                    applied: { $sum: { $cond: [{ $eq: ['$status', 'applied'] }, 1, 0] } },
+                    inProgress: { $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] } },
+                    done: { $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] } },
+                    resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } }
                 }
             },
+            { $lookup: { from: 'locations', localField: '_id', foreignField: '_id', as: 'locationDetails' } },
             {
-                $lookup: {
-                    from: 'locations',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'locationDetails'
+                $project: {
+                    _id: 1, count: 1, locationDetails: 1,
+                    statusBreakdown: { applied: '$applied', inProgress: '$inProgress', done: '$done', resolved: '$resolved' }
                 }
             }
+        ]);
+
+        // Category Distribution
+        const categoryDistribution = await GrieVance.aggregate([
+            { $group: { _id: '$category', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+
+        // Time Series: Daily (Last 14 Days)
+        const fourteenDaysAgo = new Date();
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+        const dailyTrend = await GrieVance.aggregate([
+            { $match: { createdAt: { $gte: fourteenDaysAgo } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    reported: { $sum: 1 },
+                    resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Time Series: Weekly (Last 8 Weeks)
+        const eightWeeksAgo = new Date();
+        eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56);
+        const weeklyTrend = await GrieVance.aggregate([
+            { $match: { createdAt: { $gte: eightWeeksAgo } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-W%U", date: "$createdAt" } },
+                    reported: { $sum: 1 },
+                    resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Time Series: Monthly (Last 6 Months)
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const monthlyTrend = await GrieVance.aggregate([
+            { $match: { createdAt: { $gte: sixMonthsAgo } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+                    reported: { $sum: 1 },
+                    resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } }
+                }
+            },
+            { $sort: { _id: 1 } }
         ]);
 
         res.status(200).json({
@@ -60,12 +101,15 @@ exports.getDashboardStats = async (req, res) => {
                     resolved: resolvedCount,
                     percentageResolved: totalGrievances > 0 ? Math.round((resolvedCount / totalGrievances) * 100) : 0
                 },
-                users: {
-                    contractors: totalContractors,
-                    students: totalStudents
-                },
+                users: { contractors: totalContractors, students: totalStudents },
                 locations: totalLocations,
-                grievancesByLocation
+                grievancesByLocation,
+                categoryDistribution,
+                trends: {
+                    daily: dailyTrend,
+                    weekly: weeklyTrend,
+                    monthly: monthlyTrend
+                }
             }
         });
     } catch (error) {
@@ -80,7 +124,7 @@ exports.getAllGrievances = async (req, res) => {
         const { status, location, priority, criticality, page = 1, limit = 10 } = req.query;
 
         let query = {};
-        
+
         if (status) query.status = status;
         if (location) query.locationId = location;
         if (priority) query.priority = priority;
@@ -115,8 +159,10 @@ exports.getAllGrievances = async (req, res) => {
                 floor: g.locationId?.floorNumber,
                 submittedBy: g.submittedBy ? `${g.submittedBy.fName} ${g.submittedBy.lastName}` : null,
                 assignedContractor: g.assignedContractor ? `${g.assignedContractor.fName} ${g.assignedContractor.lastName}` : null,
+                initialPhoto: g.initialPhoto,
                 resolvedPhoto: g.resolvedPhoto,
-                status: g.status,
+                description: g.description,
+                contractorNotes: g.contractorNotes,
                 createdAt: g.createdAt
             }))
         });

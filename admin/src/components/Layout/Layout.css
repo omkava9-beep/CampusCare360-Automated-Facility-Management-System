@@ -1,0 +1,30 @@
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    background: #060919;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 48px;
+    color: var(--text-main);
+    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.content-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
