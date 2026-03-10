@@ -229,30 +229,44 @@ const downloadLocationQR = async (req, res) => {
 
     // 4. Generate the QR Code specifically for the PDF
     const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/report/${location._id}`;
+    const qrSize = 400; // Increased size
     const qrBuffer = await QRCode.toBuffer(frontendUrl, {
       errorCorrectionLevel: 'H',
-      width: 300,
+      width: qrSize,
       margin: 1
     });
 
-    // 5. Center the QR Code in the PDF
-    doc.image(qrBuffer, (doc.page.width - 300) / 2, doc.y, { width: 300 });
-    doc.y += 320; // Manually advance doc.y below the absolute positioned image
+    // 5. Insert the QR Code in the PDF flow (centered)
+    const qrX = (doc.page.width - qrSize) / 2;
+    // Draw the image at exactly qrX and current doc.y
+    doc.image(qrBuffer, qrX, doc.y, { width: qrSize, height: qrSize });
+
+    // Manually advance doc.y below the image plus some padding
+    doc.y += qrSize + 20;
 
     // 6. Add Location Details (The "Sticker" Info)
-    const startY = doc.y;
-    doc.rect(50, startY, doc.page.width - 100, 130).stroke(); // Draw a box around details
+    const stickerWidth = 450;
+    const stickerX = (doc.page.width - stickerWidth) / 2;
 
-    doc.font('Helvetica-Bold').fontSize(18).fillColor('black').text(`Building: ${location.buildingBlock}`, 50, startY + 20, { align: 'center', width: doc.page.width - 100 });
+    // Calculate how much vertical space the text will take
+    const startY = doc.y;
+
+    // Draw the text first to establish flow height
+    doc.font('Helvetica-Bold').fontSize(18).fillColor('black').text(`Building: ${location.buildingBlock}`, stickerX, startY + 20, { align: 'center', width: stickerWidth });
     doc.moveDown(0.5);
-    doc.font('Helvetica').fontSize(16).text(`Location: ${location.locationName}`, { align: 'center', width: doc.page.width - 100 });
+    doc.font('Helvetica').fontSize(16).text(`Location: ${location.locationName}`, { align: 'center', width: stickerWidth });
     doc.moveDown(0.5);
-    doc.text(`Floor: ${location.floorNumber}`, { align: 'center', width: doc.page.width - 100 });
+    doc.text(`Floor: ${location.floorNumber}`, { align: 'center', width: stickerWidth });
 
     if (location.isHighPriorityZone) {
       doc.moveDown(1);
-      doc.font('Helvetica-Bold').fillColor('red').text('HIGH PRIORITY ZONE', { align: 'center', width: doc.page.width - 100 });
+      doc.font('Helvetica-Bold').fillColor('red').text('HIGH PRIORITY ZONE', { align: 'center', width: stickerWidth });
     }
+
+    const endY = doc.y + 20; // Add padding at the bottom of the content
+
+    // Draw the box spanning the content we just wrote
+    doc.rect(stickerX, startY, stickerWidth, endY - startY).stroke();
 
     // 7. Finalize the PDF
     doc.end();
