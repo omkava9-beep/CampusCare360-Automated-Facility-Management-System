@@ -1,4 +1,4 @@
-import { UserPlus, Briefcase, X, UserCheck, Mail, ShieldAlert, Award, MapPin, Navigation, User, Clock, CheckCircle2, List, TrendingUp } from 'lucide-react';
+import { UserPlus, Briefcase, X, UserCheck, Mail, ShieldAlert, Award, MapPin, Navigation, User, Clock, CheckCircle2, List, TrendingUp, ShieldCheck, UserCog, ExternalLink } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents, Circle } from 'react-leaflet';
 import L from 'leaflet';
 // Fix for default marker icon in Leaflet + React
@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { fetchContractors, updateContractorStatus, createContractor, fetchContractorDetailedStats, clearSelectedContractor } from '../../redux/slices/contractorSlice';
 import { useMap } from 'react-leaflet';
+import './DirectoryStyles.css';
 
 let DefaultIcon = L.icon({
     iconUrl: markerIcon,
@@ -127,100 +128,113 @@ const Contractors = () => {
 
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Service Personnel</h1>
-        <p className="page-subtitle">Directory of verified maintenance contractors and facility experts.</p>
-        
-        <div className="action-bar">
-          <button className="primary-button" onClick={() => setShowModal(true)}>
-            <UserPlus size={18} />
-            Onboard Contractor
-          </button>
-        </div>
+    <div className="directory-container page-container">
+      {/* Background Orbs */}
+      <div className="dashboard-background">
+        <div className="orb orb-1" style={{ background: 'radial-gradient(circle, rgba(63, 185, 80, 0.08) 0%, transparent 70%)' }}></div>
+        <div className="orb orb-2" style={{ background: 'radial-gradient(circle, rgba(56, 139, 253, 0.08) 0%, transparent 70%)' }}></div>
       </div>
 
+      <header className="directory-header">
+        <div>
+            <h1 className="page-title">Service Personnel</h1>
+            <p className="page-subtitle">Directory of verified maintenance contractors and facility experts.</p>
+        </div>
+        
+        <button className="primary-button shiny-btn" onClick={() => setShowModal(true)}>
+            <UserPlus size={18} />
+            Onboard Contractor
+        </button>
+      </header>
+
       {isLoading ? (
-        <div className="loading">Accessing contractor database...</div>
+        <div className="loading-container" style={{ padding: '100px 0' }}>
+            <div className="spinner"></div>
+            <p>Accessing contractor database...</p>
+        </div>
       ) : (
-        <div className="data-table-container glass-panel">
-          <div className="table-header-box">
-             <Briefcase size={20} color="#388bfd" />
+        <div className="directory-table-wrapper glass-panel">
+          <div className="table-header-premium">
+             <Briefcase size={20} color="var(--accent-primary)" />
              <h3>Active Directory</h3>
           </div>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Personnel</th>
-                <th>Contact</th>
-                <th>Expertise</th>
-                <th>Status</th>
-                <th>Management</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((contractor) => (
-                <tr key={contractor._id}>
-                  <td>
-                    <div className="user-info-cell">
-                        <div className="user-avatar-sm" style={{ background: 'linear-gradient(135deg, #3fb950 0%, #388bfd 100%)' }}>
-                            {contractor.fName[0]}{contractor.lastName[0]}
-                        </div>
-                        <span className="user-fullname">{`${contractor.fName} ${contractor.lastName}`}</span>
-                    </div>
-                  </td>
-                  <td>{contractor.email}</td>
-                  <td>
-                    <span className="expertise-tag">
-                        {contractor.contractorDetails?.specialization || 'General Maintenance'}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-badge ${contractor.status?.toLowerCase()}`}>
-                      {contractor.status}
-                    </span>
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="directory-table">
+                <thead>
+                <tr>
+                    <th>Personnel</th>
+                    <th>Contact</th>
+                    <th>Expertise</th>
+                    <th>Status</th>
+                    <th>Management</th>
+                </tr>
+                </thead>
+                <tbody>
+                {list.map((contractor) => (
+                    <tr key={contractor._id}>
                     <td>
-                      <div className="action-buttons-cell">
+                        <div className="personnel-cell">
+                            <div className="personnel-avatar" style={{ background: 'linear-gradient(135deg, #3fb950 0%, #388bfd 100%)' }}>
+                                {contractor.fName[0]}{contractor.lastName[0]}
+                            </div>
+                            <span className="personnel-name">{`${contractor.fName} ${contractor.lastName}`}</span>
+                        </div>
+                    </td>
+                    <td>{contractor.email}</td>
+                    <td>
+                        <span className="expertise-tag" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                            {contractor.contractorDetails?.specialization || 'General Maintenance'}
+                        </span>
+                    </td>
+                    <td>
+                        <span className={`status-badge ${contractor.status?.toLowerCase()}`}>
+                        {contractor.status}
+                        </span>
+                    </td>
+                    <td>
+                        <div className="management-actions">
                         <select 
-                          value={contractor.status} 
-                          onChange={(e) => handleStatusChange(contractor._id, e.target.value)}
-                          className="status-select"
+                            value={contractor.status} 
+                            onChange={(e) => handleStatusChange(contractor._id, e.target.value)}
+                            className="status-dropdown"
                         >
-                          <option value="Active">Active</option>
-                          <option value="Inactive">Inactive</option>
-                          <option value="Suspended">Suspended</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Suspended">Suspended</option>
                         </select>
                         <button 
-                            className="secondary-button-sm"
+                            className="action-icon-btn"
                             onClick={() => handleViewProfile(contractor._id)}
                             title="View Full Profile"
                         >
-                            <User size={14} />
-                            Profile
+                            <UserCog size={16} />
                         </button>
                         <button 
-                            className="secondary-button-sm"
+                            className="action-icon-btn"
                             onClick={() => {
                                 setViewingContractor(contractor);
                                 setShowViewMap(true);
                             }}
                             title="View Assigned Location"
                         >
-                            <MapPin size={14} />
-                            Location
+                            <Navigation size={16} />
                         </button>
-                      </div>
+                        </div>
                     </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {list.length === 0 && <div className="no-data">No personnel records found in this category.</div>}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+          </div>
+          {list.length === 0 && (
+            <div className="no-data" style={{ padding: '60px', textAlign: 'center' }}>
+                <ShieldAlert size={48} color="rgba(255,255,255,0.05)" style={{ marginBottom: '16px' }} />
+                <p>No personnel records found in this category.</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Contractor Onboarding Modal */}
       {showModal && (
         <div className="modal-overlay">
             <div className="modal-content glass-panel" style={{ maxWidth: '600px' }}>

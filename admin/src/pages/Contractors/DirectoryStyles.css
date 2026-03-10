@@ -1,0 +1,190 @@
+/* ============================================================
+   DIRECTORY SHARED STYLES - PERSONNEL & RESIDENTS
+   ============================================================ */
+
+.directory-container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Page Header */
+.directory-header {
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* Data Table Wrapper */
+.directory-table-wrapper {
+    background: rgba(22, 27, 45, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 24px;
+}
+
+.table-header-premium {
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.table-header-premium h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.directory-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.directory-table th {
+    padding: 16px 24px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.directory-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #cbd5e0;
+    font-size: 0.9rem;
+}
+
+.directory-table tr:last-child td {
+    border-bottom: none;
+}
+
+.directory-table tr:hover td {
+    background: rgba(255, 255, 255, 0.01);
+}
+
+/* Personnel Info Cell */
+.personnel-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.personnel-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #fff;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.personnel-name {
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Management Actions */
+.management-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-dropdown {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.action-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-icon-btn:hover {
+    background: rgba(56, 139, 253, 0.15);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* ============================================================
+   CONTRACTOR PROFILE MODAL (SCROLLABLE/FULLSCREEN)
+   ============================================================ */
+
+.profile-overlay {
+    backdrop-filter: blur(8px);
+}
+
+.profile-content-premium {
+    background: rgba(13, 17, 23, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Profile specific styles from original Contractors.jsx should be adapted here if they aren't already global */
+
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+
+@media (max-width: 1024px) {
+
+    .directory-table th:nth-child(2),
+    .directory-table td:nth-child(2) {
+        display: none;
+        /* Hide email on tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .directory-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .directory-table-wrapper {
+        border-radius: 12px;
+        overflow-x: auto;
+    }
+
+    .directory-table {
+        min-width: 650px;
+    }
+}
+
+@media (max-width: 480px) {
+    .primary-button {
+        width: 100%;
+        justify-content: center;
+    }
+}

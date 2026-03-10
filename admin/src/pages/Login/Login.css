@@ -27,6 +27,7 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: var(--bg-dark);
+  overflow-x: hidden;
 }
 
 .login-container {
@@ -37,6 +38,7 @@ body {
   background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 /* Animated gradient orbs background */
@@ -136,18 +138,18 @@ body {
 /* Login Header */
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .logo-circle {
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   background: transparent;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 10px;
+  margin: 0 auto 5px;
   animation: logo-pulse 3s ease-in-out infinite;
 }
 
@@ -275,6 +277,8 @@ body {
 .toggle-password {
   position: absolute;
   right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -285,6 +289,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 5;
 }
 
 .toggle-password:hover {
@@ -598,19 +603,26 @@ body {
 @media (max-width: 1024px) {
   .login-wrapper {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 0;
+    justify-items: center;
+    max-width: 600px;
   }
 
   .login-side-info {
     display: none;
   }
 
+  .floating-elements {
+    display: none;
+  }
+
   .login-card {
     padding: 40px;
+    width: 100%;
   }
 
   .login-title {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 }
 
@@ -619,13 +631,18 @@ body {
     padding: 20px;
   }
 
+  .login-wrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+
   .login-card {
-    padding: 30px;
+    padding: 35px 25px;
     border-radius: 15px;
   }
 
   .login-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .login-subtitle {
@@ -633,13 +650,8 @@ body {
   }
 
   .logo-circle {
-    width: 70px;
-    height: 70px;
-  }
-
-  .logo-img {
-    width: 100%;
-    height: 100%;
+    width: 90px;
+    height: 90px;
   }
 
   .form-label {
@@ -652,8 +664,8 @@ body {
   }
 
   .submit-button {
-    padding: 12px 25px;
-    font-size: 0.9rem;
+    padding: 14px 25px;
+    font-size: 0.95rem;
   }
 
   .gradient-orb {
@@ -661,53 +673,58 @@ body {
   }
 
   .gradient-orb-1 {
-    width: 300px;
-    height: 300px;
+    width: 250px;
+    height: 250px;
   }
 
   .gradient-orb-2 {
-    width: 200px;
-    height: 200px;
+    width: 150px;
+    height: 150px;
   }
 
   .gradient-orb-3 {
-    width: 250px;
-    height: 250px;
+    width: 200px;
+    height: 200px;
   }
 }
 
 @media (max-width: 480px) {
   .login-card {
-    padding: 25px;
+    padding: 30px 20px;
     box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
   }
 
+  .login-wrapper {
+    width: 95%;
+  }
+
   .login-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.8rem;
   }
 
   .logo-circle {
-    width: 60px;
-    height: 60px;
-  }
-
-  .logo-img {
-    width: 100%;
-    height: 100%;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 5px;
   }
 
   .form-label {
     font-size: 0.8rem;
+    margin-bottom: 8px;
   }
 
   .form-input {
-    padding: 11px 13px;
+    padding: 12px 14px;
     font-size: 16px;
   }
 
   .submit-button {
-    padding: 11px 20px;
-    font-size: 0.85rem;
+    padding: 12px 20px;
+    font-size: 0.9rem;
     gap: 8px;
   }
 

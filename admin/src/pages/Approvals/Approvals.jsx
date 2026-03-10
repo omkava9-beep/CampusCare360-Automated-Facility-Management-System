@@ -4,8 +4,9 @@ import { fetchGrievances, approveGrievance, rejectGrievance } from '../../redux/
 import {
   ClipboardList, AlertCircle, CheckCircle, XCircle,
   User, MapPin, Search, Clock, CheckCircle2, ChevronRight, X,
-  Image as ImageIcon, Eye
+  Image as ImageIcon, Eye, ShieldCheck, Zap
 } from 'lucide-react';
+import './Approvals.css';
 
 const API_BASE_URL = 'http://localhost:4000';
 
@@ -20,7 +21,7 @@ const GrievanceImage = ({ src, alt, className, onPreview }) => {
   if (!imageUrl) {
     return (
       <div className="grievance-thumb-placeholder">
-        <ClipboardList size={28} color="rgba(255,255,255,0.15)" />
+        <ClipboardList size={32} color="rgba(255,255,255,0.1)" />
       </div>
     );
   }
@@ -29,8 +30,11 @@ const GrievanceImage = ({ src, alt, className, onPreview }) => {
       src={imageUrl} 
       alt={alt} 
       className={className} 
-      onClick={() => onPreview(imageUrl)}
-      style={{ cursor: 'pointer' }}
+      onClick={(e) => {
+          e.stopPropagation();
+          onPreview(imageUrl);
+      }}
+      loading="lazy"
     />
   );
 };
@@ -41,22 +45,22 @@ const ApprovalCard = ({ grievance, onReview, onImagePreview }) => {
   });
 
   return (
-    <div className="approval-card-special glass-panel">
+    <div className="approval-card-special glass-panel" onClick={() => onReview(grievance)}>
       <div className="approval-card-header">
         <div className="approval-card-title-group">
           <span className="approval-ticket-badge">{grievance.ticketID}</span>
           <h3 className="approval-title">{grievance.subject}</h3>
         </div>
-        <span className="approval-status-pulse">Needs Review</span>
+        <span className="approval-status-pulse">Verification Needed</span>
       </div>
 
       <div className="approval-card-body">
         <div className="approval-image-split">
-          <div className="approval-img-wrapper" onClick={() => onImagePreview(getImageUrl(grievance.initialPhoto))}>
+          <div className="approval-img-wrapper">
              <div className="img-label">Initial</div>
              <GrievanceImage src={grievance.initialPhoto} alt="Initial" className="approval-thumb" onPreview={onImagePreview} />
           </div>
-          <div className="approval-img-wrapper" onClick={() => onImagePreview(getImageUrl(grievance.resolvedPhoto))}>
+          <div className="approval-img-wrapper">
              <div className="img-label success-label">Resolved</div>
              <GrievanceImage src={grievance.resolvedPhoto} alt="Resolved" className="approval-thumb highlight-border" onPreview={onImagePreview} />
           </div>
@@ -64,12 +68,12 @@ const ApprovalCard = ({ grievance, onReview, onImagePreview }) => {
 
         <div className="approval-meta-grid">
            <div className="meta-item">
-             <MapPin size={14} color="var(--text-muted)" />
-             <span>Zone: {grievance.location || 'Unknown'}</span>
+             <MapPin size={14} />
+             <span>Zone: {grievance.location || 'Unknown'} (F{grievance.floor})</span>
            </div>
            <div className="meta-item">
-             <Clock size={14} color="var(--text-muted)" />
-             <span>Submitted: {date}</span>
+             <Clock size={14} />
+             <span>Completed: {date}</span>
            </div>
         </div>
       </div>
@@ -79,10 +83,10 @@ const ApprovalCard = ({ grievance, onReview, onImagePreview }) => {
           <div className="contractor-avatar-sm">
             {grievance.assignedContractor?.charAt(0).toUpperCase()}
           </div>
-          <span><strong>{grievance.assignedContractor}</strong> completed this task</span>
+          <span><strong>{grievance.assignedContractor}</strong> requested verification</span>
         </div>
-        <button className="primary-button shiny-btn" onClick={() => onReview(grievance)}>
-          Verify & Approve <ChevronRight size={16} />
+        <button className="primary-button shiny-btn" style={{ width: '100%', justifyContent: 'center' }}>
+          Inspect Work <ChevronRight size={16} />
         </button>
       </div>
     </div>
@@ -133,17 +137,20 @@ export default function Approvals() {
   );
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Work Approvals</h1>
-          <p className="page-subtitle">Review completed tasks and verify contractor resolutions.</p>
-        </div>
+    <div className="approvals-container page-container">
+      <div className="dashboard-background">
+        <div className="orb orb-1" style={{ background: 'radial-gradient(circle, rgba(63, 185, 80, 0.1) 0%, transparent 70%)' }}></div>
+        <div className="orb orb-2" style={{ background: 'radial-gradient(circle, rgba(56, 139, 253, 0.1) 0%, transparent 70%)' }}></div>
       </div>
+
+      <header className="approvals-header">
+        <h1 className="page-title">Work Verification</h1>
+        <p className="page-subtitle">Inspect and finalize resolutions submitted by maintenance experts.</p>
+      </header>
 
       <div className="grievance-controls">
         <div className="grievance-search-box glass-panel" style={{ maxWidth: '400px' }}>
-          <Search size={16} color="var(--text-muted)" />
+          <Search size={18} color="rgba(255,255,255,0.3)" />
           <input
             type="text"
             placeholder="Search pending approvals..."
@@ -154,12 +161,15 @@ export default function Approvals() {
       </div>
 
       {isLoading ? (
-        <div className="loading">Fetching pending reviews...</div>
+        <div className="loading-container" style={{ padding: '100px 0' }}>
+            <div className="spinner"></div>
+            <p>Fetching pending reviews...</p>
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="no-data glass-panel" style={{ marginTop: '24px' }}>
-          <CheckCircle size={48} color="rgba(63, 185, 80, 0.2)" style={{ marginBottom: '20px' }} />
-          <h3>All caught up!</h3>
-          <p>There are no grievances awaiting approval at the moment.</p>
+        <div className="no-data glass-panel" style={{ padding: '80px', marginTop: '24px', textAlign: 'center' }}>
+          <ShieldCheck size={64} color="rgba(63, 185, 80, 0.1)" style={{ marginBottom: '24px' }} />
+          <h3 style={{ color: '#fff', marginBottom: '8px' }}>All caught up!</h3>
+          <p style={{ color: 'var(--text-muted)' }}>There are no grievances awaiting approval at the moment.</p>
         </div>
       ) : (
         <div className="approvals-feed">
@@ -174,130 +184,100 @@ export default function Approvals() {
         </div>
       )}
 
-      {/* Review Modal */}
       {selectedGrievance && (
         <div className="modal-overlay" onClick={() => setSelectedGrievance(null)}>
-          <div className="modal-content glass-panel" style={{ maxWidth: '1100px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-content glass-panel" style={{ maxWidth: '1000px', borderRadius: '24px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header" style={{ padding: '24px 32px' }}>
               <div className="header-text-group">
-                <h2 className="modal-title">Review Work Completion</h2>
-                <p className="modal-subtitle">Approving resolution for Ticket {selectedGrievance.ticketID}</p>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Quality Assurance
+                </span>
+                <h2 className="modal-title" style={{ fontSize: '1.75rem', marginTop: '4px' }}>Review Work: {selectedGrievance.ticketID}</h2>
               </div>
-              <button className="close-modal" onClick={() => setSelectedGrievance(null)}>
+              <button className="close-modal" onClick={() => setSelectedGrievance(null)} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={20} />
               </button>
             </div>
 
-            <div className="modal-body">
-              <div className="approval-photos">
-                <div className="photo-comparison">
-                  <div className="photo-box">
-                    <label>Initial Incident</label>
-                    <GrievanceImage 
-                        src={selectedGrievance.initialPhoto} 
-                        alt="Initial" 
-                        className="comparison-img" 
-                        onPreview={setPreviewImage} 
-                    />
-                  </div>
-                  <div className="photo-box">
-                    <label>Resolution Proof</label>
-                    <GrievanceImage 
-                        src={selectedGrievance.resolvedPhoto} 
-                        alt="Resolved" 
-                        className="comparison-img highlight" 
-                        onPreview={setPreviewImage} 
-                    />
-                  </div>
-                </div>
-              </div>
+            <div className="modal-body" style={{ padding: '0 32px 32px' }}>
+               <div className="details-layout-premium" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: '32px' }}>
+                    <div className="details-col-left">
+                        <div className="photo-comparison-premium" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
+                            <div className="photo-box-premium">
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>Before</label>
+                                <GrievanceImage src={selectedGrievance.initialPhoto} alt="Initial" className="comparison-img-v2" onPreview={setPreviewImage} />
+                            </div>
+                            <div className="photo-box-premium">
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--success)', marginBottom: '8px' }}>After</label>
+                                <GrievanceImage src={selectedGrievance.resolvedPhoto} alt="Resolved" className="comparison-img-v2 success-glow" onPreview={setPreviewImage} />
+                            </div>
+                        </div>
 
-              <div className="grievance-full-details mt-4">
-                <div className="details-section">
-                  <h4 className="section-label">Incident Information</h4>
-                  <div className="details-grid-premium">
-                    <div className="detail-item-premium">
-                      <label>Subject</label>
-                      <span>{selectedGrievance.subject}</span>
-                    </div>
-                    <div className="detail-item-premium">
-                      <label>Category</label>
-                      <span className="badge-category">{selectedGrievance.category}</span>
-                    </div>
-                    <div className="detail-item-premium">
-                      <label>Priority</label>
-                      <span className={`badge-priority ${selectedGrievance.priority?.toLowerCase()}`}>{selectedGrievance.priority}</span>
-                    </div>
-                    <div className="detail-item-premium">
-                      <label>Criticality</label>
-                      <span className={`badge-criticality ${selectedGrievance.criticality?.toLowerCase()}`}>{selectedGrievance.criticality}</span>
-                    </div>
-                    <div className="detail-item-premium">
-                      <label>Location</label>
-                      <span>{selectedGrievance.location} (Floor {selectedGrievance.floor})</span>
-                    </div>
-                    <div className="detail-item-premium">
-                      <label>Submitted By</label>
-                      <span>{selectedGrievance.submittedBy}</span>
-                    </div>
-                  </div>
-                </div>
+                        <div className="description-section-premium" style={{ background: 'rgba(255,255,255,0.02)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#fff' }}>Contracter Completion Notes</h4>
+                            <p style={{ margin: 0, color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.95rem' }}>
+                                "{selectedGrievance.contractorNotes || 'No notes provided by contractor.'}"
+                            </p>
+                        </div>
 
-                <div className="details-section mt-3">
-                  <h4 className="section-label">Incident Description</h4>
-                  <p className="description-text">{selectedGrievance.description || 'No description provided.'}</p>
-                </div>
+                        <div className="feedback-entry mt-4">
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px' }}>Administrative Verdict</label>
+                            <textarea
+                                className="glass-panel"
+                                style={{ width: '100%', padding: '16px', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.08)', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
+                                rows="3"
+                                placeholder="Add verification feedback or specify required revisions..."
+                                value={feedback}
+                                onChange={e => setFeedback(e.target.value)}
+                            />
+                        </div>
+                    </div>
 
-                <div className="details-section mt-3">
-                   <h4 className="section-label">Contractor Performance</h4>
-                   <div className="details-grid-premium">
-                     <div className="detail-item-premium">
-                        <label>Assigned Contractor</label>
-                        <span>{selectedGrievance.assignedContractor}</span>
-                     </div>
-                     <div className="detail-item-premium">
-                        <label>Completion Date</label>
-                        <span>{new Date(selectedGrievance.createdAt).toLocaleString()}</span>
-                     </div>
-                   </div>
-                   {selectedGrievance.contractorNotes && (
-                     <div className="contractor-notes-box mt-2">
-                        <label>Completion Notes:</label>
-                        <p>{selectedGrievance.contractorNotes}</p>
-                     </div>
-                   )}
-                </div>
-              </div>
+                    <div className="details-col-right">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            <div className="info-group-premium">
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>Task Essence</label>
+                                <div style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 700 }}>{selectedGrievance.subject}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Zone: {selectedGrievance.location} (Floor {selectedGrievance.floor})</div>
+                            </div>
 
-              <div className="feedback-section-premium mt-4">
-                <label className="feedback-label">Admin Approval Feedback</label>
-                <textarea
-                  className="feedback-textarea"
-                  rows="3"
-                  placeholder="Verify quality of work or provide reasons for revision..."
-                  value={feedback}
-                  onChange={e => setFeedback(e.target.value)}
-                />
-              </div>
+                            <div className="info-group-premium">
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>Assigned Expert</label>
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="contractor-avatar-sm" style={{ width: '32px', height: '32px' }}>
+                                        {selectedGrievance.assignedContractor?.charAt(0)}
+                                    </div>
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{selectedGrievance.assignedContractor}</span>
+                                </div>
+                            </div>
+
+                            <div className="info-group-premium">
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>Criticality</label>
+                                <span className={`badge-priority ${selectedGrievance.priority?.toLowerCase()}`}>{selectedGrievance.priority}</span>
+                            </div>
+                        </div>
+                    </div>
+               </div>
             </div>
 
-            <div className="modal-footer">
-              <button className="secondary-button" onClick={() => setSelectedGrievance(null)}>
-                Close Review
+            <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+              <button className="secondary-button" style={{ minWidth: '140px' }} onClick={() => setSelectedGrievance(null)}>
+                Cancel
               </button>
-              <div className="footer-actions">
+              <div style={{ display: 'flex', gap: '16px', flex: 1, justifyContent: 'flex-end' }}>
                 <button 
                   className="reject-btn" 
                   onClick={handleReject}
-                  style={{ background: 'rgba(248, 81, 73, 0.1)', color: '#f85149', border: '1px solid rgba(248, 81, 73, 0.2)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                  style={{ background: 'rgba(248, 81, 73, 0.1)', color: '#f85149', border: '1px solid rgba(248, 81, 73, 0.2)', padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
                 >
-                  <XCircle size={18} /> Request Revision
+                  <XCircle size={18} /> Revision Required
                 </button>
                 <button 
-                  className="primary-button" 
+                  className="primary-button shiny-btn" 
                   onClick={handleApprove}
+                  style={{ padding: '12px 32px', borderRadius: '12px' }}
                 >
-                  <CheckCircle size={18} /> Confirm Resolution
+                  <CheckCircle size={18} /> Approve & Close
                 </button>
               </div>
             </div>
@@ -305,22 +285,64 @@ export default function Approvals() {
         </div>
       )}
 
-      {/* Image Preview Modal */}
       {previewImage && (
-        <div className="modal-overlay" onClick={() => setPreviewImage(null)}>
-          <div className="modal-content glass-panel" style={{ maxWidth: '1000px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">Evidence Preview</h2>
-              <button className="close-modal" onClick={() => setPreviewImage(null)}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal-body" style={{ background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-              <img src={previewImage} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }} />
-            </div>
-          </div>
+        <div className="fullscreen-image-overlay" onClick={() => setPreviewImage(null)}>
+          <button className="close-fullscreen" onClick={() => setPreviewImage(null)}>
+            <X size={24} />
+          </button>
+          <img src={previewImage} alt="Preview" className="fullscreen-image" onClick={e => e.stopPropagation()} />
         </div>
       )}
+
+      <style jsx="true">{`
+        .comparison-img-v2 {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: zoom-in;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.3s ease;
+        }
+        .comparison-img-v2:hover {
+            transform: scale(1.02);
+        }
+        .success-glow {
+            border-color: rgba(63, 185, 80, 0.4);
+            box-shadow: 0 0 20px rgba(63, 185, 80, 0.1);
+        }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--text-muted);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(56, 139, 253, 0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 900px) {
+            .details-layout-premium {
+                grid-template-columns: 1fr !important;
+            }
+            .details-col-right {
+                order: -1;
+            }
+            .photo-comparison-premium {
+                grid-template-columns: 1fr !important;
+            }
+        }
+      `}</style>
     </div>
   );
 }
