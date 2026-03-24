@@ -1,0 +1,125 @@
+.earnings-page {
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.wallet-card {
+    background: linear-gradient(135deg, var(--primary) 0%, #1a4d8d 100%);
+    padding: 24px 32px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    box-shadow: 0 10px 30px rgba(56, 139, 253, 0.2);
+}
+
+.wallet-info .label { font-size: 0.9rem; opacity: 0.9; display: block; }
+.wallet-info .amount { font-size: 2.5rem; font-weight: 800; }
+
+.withdraw-btn {
+    background: white;
+    color: var(--primary);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.withdraw-btn:hover { transform: scale(1.05); }
+
+.earnings-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 32px;
+    margin: 40px 0;
+}
+
+.chart-container {
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-top: 30px;
+}
+
+.chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.chart-bar-wrap .bar {
+    width: 100%;
+    background: rgba(56, 139, 253, 0.1);
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    transition: height 0.5s ease;
+}
+
+.chart-bar-wrap .bar:hover { background: var(--primary); }
+
+.tooltip {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-sidebar);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.day { font-size: 0.8rem; color: var(--text-muted); }
+
+.payout-list { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+.payout-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+}
+
+.payout-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(63, 185, 80, 0.1);
+    color: #3fb950;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.p-amount { font-weight: 700; color: #3fb950; }
+
+.task-table { margin-top: 24px; }
+.table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+}
+
+.table-row:hover { background: rgba(255,255,255,0.02); }
+.t-id { color: var(--primary); font-weight: 700; }
+.t-status { color: #3fb950; font-weight: 600; }

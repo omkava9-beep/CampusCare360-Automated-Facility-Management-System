@@ -8,11 +8,30 @@ const { addGrievance, uploadGrievancePhoto, uploadResolvedPhoto, getGrievancePho
 const { authenticateToken } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
+// Notification Controller imports
+const {
+    getNotifications,
+    markAsRead,
+    markAllAsRead
+} = require('../controllers/notificationController');
+
 // Student Controller imports
 const { getMyGrievances, getGrievanceDetail, getStudentProfile, updateStudentProfile, uploadProfilePicture, changePassword } = require('../controllers/studentControllers');
 
 // Contractor Controller imports
-const { getAssignedGrievances: getContractorGrievances, getGrievanceDetail: getContractorGrievanceDetail, updateGrievanceStatus, getContractorStats, getContractorProfile, updateContractorProfile, uploadProfilePicture: uploadContractorProfile, changePassword: contractorChangePassword } = require('../controllers/contractorControllers');
+const { 
+    getAssignedGrievances: getContractorGrievances, 
+    getGrievanceDetail: getContractorGrievanceDetail, 
+    updateGrievanceStatus, 
+    getContractorStats, 
+    getContractorProfile, 
+    updateContractorProfile, 
+    uploadProfilePicture: uploadContractorProfile, 
+    changePassword: contractorChangePassword, 
+    toggleAvailability, 
+    acceptGrievance, 
+    rejectGrievance: contractorRejectGrievance 
+} = require('../controllers/contractorControllers');
 
 // Admin/Dashboard Controller imports
 const { getDashboardStats, getAllGrievances, getGrievancesByLocation, getGrievanceForApproval, approveGrievance, rejectGrievance, getPendingApprovals } = require('../controllers/dashboardControllers');
@@ -50,16 +69,30 @@ routes.get('/student/grievances/:grievanceId', authenticateToken, getGrievanceDe
 routes.get('/student/profile', authenticateToken, getStudentProfile);
 routes.put('/student/profile', authenticateToken, updateStudentProfile);
 routes.post('/student/profile-picture', authenticateToken, upload.single('photo'), uploadProfilePicture);
-routes.post('/student/change-password', authenticateToken, changePassword);
+routes.post('/contractor/change-password', authenticateToken, contractorChangePassword);
 
 // ============= CONTRACTOR ROUTES =============
 routes.get('/contractor/grievances', authenticateToken, getContractorGrievances);
 routes.get('/contractor/grievances/:grievanceId', authenticateToken, getContractorGrievanceDetail);
 routes.put('/contractor/grievances/:grievanceId/status', authenticateToken, updateGrievanceStatus);
+routes.put('/contractor/grievances/:grievanceId/accept', authenticateToken, acceptGrievance);
+routes.put('/contractor/grievances/:grievanceId/reject', authenticateToken, contractorRejectGrievance);
+routes.put('/contractor/availability', authenticateToken, toggleAvailability);
 routes.get('/contractor/stats', authenticateToken, getContractorStats);
 routes.get('/contractor/profile', authenticateToken, getContractorProfile);
 routes.put('/contractor/profile', authenticateToken, updateContractorProfile);
 routes.post('/contractor/profile-picture', authenticateToken, upload.single('photo'), uploadContractorProfile);
 routes.post('/contractor/change-password', authenticateToken, contractorChangePassword);
 
-module.exports = routes
+const { sendMessage, getMessages } = require('../controllers/chatController');
+
+// ============= CHAT ROUTES =============
+routes.post('/chat/send', authenticateToken, sendMessage);
+routes.get('/chat/:grievanceId', authenticateToken, getMessages);
+
+// ============= NOTIFICATION ROUTES (All authenticated users) =============
+routes.get('/notifications', authenticateToken, getNotifications);
+routes.put('/notifications/:id/read', authenticateToken, markAsRead);
+routes.put('/notifications/read-all', authenticateToken, markAllAsRead);
+
+module.exports = routes;

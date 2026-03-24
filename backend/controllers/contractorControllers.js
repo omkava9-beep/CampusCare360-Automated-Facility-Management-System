@@ -14,7 +14,9 @@ exports.getAssignedGrievances = async (req, res) => {
 
         let query = { assignedContractor: contractorId };
         
-        if (status) {
+        if (status === 'history') {
+            query.status = { $in: ['done', 'resolved'] };
+        } else if (status) {
             query.status = status;
         }
 
@@ -127,6 +129,9 @@ exports.updateGrievanceStatus = async (req, res) => {
         if (notes) {
             grievance.contractorNotes = notes;
         }
+        if (req.body.resolvedPhoto) {
+            grievance.resolvedPhoto = req.body.resolvedPhoto;
+        }
 
         await grievance.save();
 
@@ -174,14 +179,115 @@ exports.getContractorStats = async (req, res) => {
     }
 };
 
-// Get contractor profile
+// Get contractor profile with comprehensive analytics
 exports.getContractorProfile = async (req, res) => {
     try {
-        const contractor = await User.findById(req.user._id).select('-password');
+        const userId = req.user._id;
+        const user = await User.findById(userId).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'Contractor not found' });
+        }
+
+        // --- Status Breakdown ---
+        const total = await GrieVance.countDocuments({ assignedContractor: userId });
+        const applied = await GrieVance.countDocuments({ assignedContractor: userId, status: 'applied' });
+        const inProgress = await GrieVance.countDocuments({ assignedContractor: userId, status: 'in-progress' });
+        const done = await GrieVance.countDocuments({ assignedContractor: userId, status: 'done' });
+        const resolved = await GrieVance.countDocuments({ assignedContractor: userId, status: 'resolved' });
+
+        // --- Priority Breakdown ---
+        const lowPriority = await GrieVance.countDocuments({ assignedContractor: userId, priority: 'Low' });
+        const mediumPriority = await GrieVance.countDocuments({ assignedContractor: userId, priority: 'Medium' });
+        const highPriority = await GrieVance.countDocuments({ assignedContractor: userId, priority: 'High' });
+
+        // --- Criticality Breakdown ---
+        const normalCriticality = await GrieVance.countDocuments({ assignedContractor: userId, criticality: 'Normal' });
+        const criticalCriticality = await GrieVance.countDocuments({ assignedContractor: userId, criticality: 'Critical' });
+        const emergencyCriticality = await GrieVance.countDocuments({ assignedContractor: userId, criticality: 'Emergency' });
+
+        // --- Average Resolution Time (in hours) ---
+        const resolvedGrievances = await GrieVance.find({
+            assignedContractor: userId,
+            status: { $in: ['done', 'resolved'] },
+            resolvedAt: { $exists: true, $ne: null }
+        }).select('createdAt resolvedAt');
+
+        let avgResolutionHours = null;
+        if (resolvedGrievances.length > 0) {
+            const totalMs = resolvedGrievances.reduce((sum, g) => {
+                return sum + (new Date(g.resolvedAt) - new Date(g.createdAt));
+            }, 0);
+            avgResolutionHours = Math.round((totalMs / resolvedGrievances.length) / (1000 * 60 * 60));
+        }
+
+        // --- Monthly Activity Trend (last 6 months) ---
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const monthlyTrend = await GrieVance.aggregate([
+            {
+                $match: {
+                    assignedContractor: user._id,
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' }
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1, '_id.month': 1 } }
+        ]);
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const formattedTrend = monthlyTrend.map(m => ({
+            label: `${monthNames[m._id.month - 1]} ${m._id.year}`,
+            count: m.count
+        }));
+
+        // --- Extended Recent Tasks (10 with full detail) ---
+        const recentTasks = await GrieVance.find({ assignedContractor: userId })
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .populate('locationId', 'locationName buildingBlock floorNumber')
+            .populate('submittedBy', 'fName lastName');
 
         res.status(200).json({
             message: 'Profile retrieved successfully',
-            profile: contractor
+            profile: user,
+            stats: {
+                total,
+                applied,
+                inProgress,
+                done,
+                resolved,
+                completionRate: total > 0 ? Math.round(((done + resolved) / total) * 100) : 0,
+                avgResolutionHours,
+                activeTasksCount: applied + inProgress
+            },
+            priorityBreakdown: { low: lowPriority, medium: mediumPriority, high: highPriority },
+            criticalityBreakdown: { normal: normalCriticality, critical: criticalCriticality, emergency: emergencyCriticality },
+            monthlyTrend: formattedTrend,
+            recentTasks: recentTasks.map(t => ({
+                _id: t._id,
+                ticketID: t.ticketID,
+                subject: t.subject,
+                description: t.description,
+                status: t.status,
+                priority: t.priority,
+                criticality: t.criticality,
+                location: t.locationId?.locationName,
+                buildingBlock: t.locationId?.buildingBlock,
+                floor: t.locationId?.floorNumber,
+                submittedBy: t.submittedBy ? `${t.submittedBy.fName} ${t.submittedBy.lastName}` : 'Unknown',
+                createdAt: t.createdAt,
+                resolvedAt: t.resolvedAt || null,
+                dueAt: t.dueAt
+            }))
         });
     } catch (error) {
         console.error('Error fetching profile:', error);
@@ -267,6 +373,79 @@ exports.changePassword = async (req, res) => {
     } catch (error) {
         console.error('Error changing password:', error);
         res.status(500).json({ message: 'Error changing password', error: error.message });
+    }
+};
+
+// Toggle availability
+exports.toggleAvailability = async (req, res) => {
+    try {
+        const { status } = req.body; // 'Active' or 'Inactive'
+        const contractorId = req.user._id;
+
+        if (!['Active', 'Inactive'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const contractor = await User.findByIdAndUpdate(
+            contractorId,
+            { status },
+            { new: true }
+        ).select('-password');
+
+        res.status(200).json({
+            message: `Status updated to ${status}`,
+            status: contractor.status
+        });
+    } catch (error) {
+        console.error('Error toggling availability:', error);
+        res.status(500).json({ message: 'Error updating status' });
+    }
+};
+
+// Accept assigned grievance
+exports.acceptGrievance = async (req, res) => {
+    try {
+        const { grievanceId } = req.params;
+        const contractorId = req.user._id;
+
+        const grievance = await GrieVance.findById(grievanceId);
+        if (!grievance) return res.status(404).json({ message: 'Grievance not found' });
+        if (grievance.assignedContractor.toString() !== contractorId.toString()) {
+            return res.status(403).json({ message: 'Not assigned to you' });
+        }
+
+        // Move status to 'applied' (already applied by admin assignment, but we can treat this as "Acknowledged")
+        // Or add a new 'accepted' status if needed. For now let's use 'in-progress' 
+        // to lock the ticket as requested.
+        grievance.status = 'in-progress';
+        await grievance.save();
+
+        res.status(200).json({ message: 'Task accepted and locked', grievance });
+    } catch (error) {
+        res.status(500).json({ message: 'Error accepting task' });
+    }
+};
+
+// Reject assigned grievance (release it)
+exports.rejectGrievance = async (req, res) => {
+    try {
+        const { grievanceId } = req.params;
+        const contractorId = req.user._id;
+
+        const grievance = await GrieVance.findById(grievanceId);
+        if (!grievance) return res.status(404).json({ message: 'Grievance not found' });
+        if (grievance.assignedContractor.toString() !== contractorId.toString()) {
+            return res.status(403).json({ message: 'Not assigned to you' });
+        }
+
+        // Release the grievance (remove assigned contractor)
+        grievance.assignedContractor = undefined;
+        grievance.status = 'applied'; // Return to unassigned pool status
+        await grievance.save();
+
+        res.status(200).json({ message: 'Task rejected and released' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error rejecting task' });
     }
 };
 

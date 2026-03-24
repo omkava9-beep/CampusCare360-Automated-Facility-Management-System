@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchGrievances, approveGrievance, rejectGrievance } from '../../redux/slices/grievanceSlice';
+import { useNavigate } from 'react-router-dom';
+import { fetchPendingApprovals, approveGrievance, rejectGrievance } from '../../redux/slices/grievanceSlice';
 import {
   ClipboardList, AlertCircle, CheckCircle, XCircle,
   User, MapPin, Search, Clock, CheckCircle2, ChevronRight, X,
-  Image as ImageIcon, Eye, ShieldCheck, Zap
+  Image as ImageIcon, Eye, ShieldCheck, Zap, ExternalLink
 } from 'lucide-react';
 import './Approvals.css';
 
@@ -39,10 +40,13 @@ const GrievanceImage = ({ src, alt, className, onPreview }) => {
   );
 };
 
-const ApprovalCard = ({ grievance, onReview, onImagePreview }) => {
+const ApprovalCard = ({ grievance, onReview, onImagePreview, onContractorClick }) => {
   const date = new Date(grievance.createdAt).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'short', year: 'numeric'
   });
+  
+  const contractorName = grievance.assignedContractor?.name || grievance.assignedContractor || 'Unassigned';
+  const contractorId = grievance.assignedContractor?.id || null;
 
   return (
     <div className="approval-card-special glass-panel" onClick={() => onReview(grievance)}>
@@ -79,11 +83,20 @@ const ApprovalCard = ({ grievance, onReview, onImagePreview }) => {
       </div>
 
       <div className="approval-card-footer">
-        <div className="contractor-info-pill">
+        <div 
+          className="contractor-info-pill" 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (contractorId) onContractorClick(contractorId);
+          }}
+          style={{ cursor: contractorId ? 'pointer' : 'default' }}
+        >
           <div className="contractor-avatar-sm">
-            {grievance.assignedContractor?.charAt(0).toUpperCase()}
+            {contractorName.charAt(0).toUpperCase()}
           </div>
-          <span><strong>{grievance.assignedContractor}</strong> requested verification</span>
+          <span>
+            <strong className={contractorId ? "link-hover" : ""}>{contractorName}</strong> requested verification
+          </span>
         </div>
         <button className="primary-button shiny-btn" style={{ width: '100%', justifyContent: 'center' }}>
           Inspect Work <ChevronRight size={16} />
@@ -95,14 +108,19 @@ const ApprovalCard = ({ grievance, onReview, onImagePreview }) => {
 
 export default function Approvals() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { list, isLoading } = useSelector((state) => state.grievances);
   const [selectedGrievance, setSelectedGrievance] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [feedback, setFeedback] = useState('');
   const [search, setSearch] = useState('');
 
+  const handleContractorClick = (id) => {
+    navigate(`/contractors?viewProfile=${id}`);
+  };
+
   useEffect(() => {
-    dispatch(fetchGrievances({ status: 'done' }));
+    dispatch(fetchPendingApprovals());
   }, [dispatch]);
 
   const handleApprove = async () => {
@@ -111,7 +129,7 @@ export default function Approvals() {
     if (approveGrievance.fulfilled.match(result)) {
         setSelectedGrievance(null);
         setFeedback('');
-        dispatch(fetchGrievances({ status: 'done' }));
+        dispatch(fetchPendingApprovals());
     }
   };
 
@@ -124,7 +142,7 @@ export default function Approvals() {
     if (rejectGrievance.fulfilled.match(result)) {
         setSelectedGrievance(null);
         setFeedback('');
-        dispatch(fetchGrievances({ status: 'done' }));
+        dispatch(fetchPendingApprovals());
     }
   };
 
@@ -179,6 +197,7 @@ export default function Approvals() {
               grievance={g} 
               onReview={setSelectedGrievance}
               onImagePreview={setPreviewImage}
+              onContractorClick={handleContractorClick}
             />
           ))}
         </div>
@@ -243,11 +262,30 @@ export default function Approvals() {
 
                             <div className="info-group-premium">
                                 <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>Assigned Expert</label>
-                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div 
+                                    className="contractor-profile-link-box"
+                                    onClick={() => {
+                                        const id = selectedGrievance.assignedContractor?.id;
+                                        if (id) handleContractorClick(id);
+                                    }}
+                                    style={{ 
+                                        background: 'rgba(255,255,255,0.03)', 
+                                        padding: '16px', 
+                                        borderRadius: '12px', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '12px',
+                                        cursor: selectedGrievance.assignedContractor?.id ? 'pointer' : 'default',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
                                     <div className="contractor-avatar-sm" style={{ width: '32px', height: '32px' }}>
-                                        {selectedGrievance.assignedContractor?.charAt(0)}
+                                        {(selectedGrievance.assignedContractor?.name || selectedGrievance.assignedContractor || 'U').charAt(0)}
                                     </div>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{selectedGrievance.assignedContractor}</span>
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>
+                                        {selectedGrievance.assignedContractor?.name || selectedGrievance.assignedContractor || 'Unassigned'}
+                                    </span>
+                                    {selectedGrievance.assignedContractor?.id && <ExternalLink size={14} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
                                 </div>
                             </div>
 
@@ -310,6 +348,14 @@ export default function Approvals() {
         .success-glow {
             border-color: rgba(63, 185, 80, 0.4);
             box-shadow: 0 0 20px rgba(63, 185, 80, 0.1);
+        }
+        .contractor-profile-link-box:hover {
+            background: rgba(255,255,255,0.08) !important;
+            transform: translateY(-2px);
+        }
+        .link-hover:hover {
+            text-decoration: underline;
+            color: var(--accent-primary);
         }
         .loading-container {
             display: flex;

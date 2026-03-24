@@ -6,6 +6,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { fetchContractors, updateContractorStatus, createContractor, fetchContractorDetailedStats, clearSelectedContractor } from '../../redux/slices/contractorSlice';
 import { useMap } from 'react-leaflet';
 import './DirectoryStyles.css';
@@ -68,6 +69,7 @@ const MapResizer = () => {
 
 const Contractors = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { list, isLoading, selectedContractorDetails, isStatsLoading } = useSelector((state) => state.contractors);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -87,6 +89,15 @@ const Contractors = () => {
   useEffect(() => {
     dispatch(fetchContractors());
   }, [dispatch]);
+
+  // Handle deep-linking to profile from URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const viewProfileId = params.get('viewProfile');
+    if (viewProfileId) {
+      handleViewProfile(viewProfileId);
+    }
+  }, [location.search, list]); // Re-run when list is loaded or search changes
 
   const handleStatusChange = (userId, newState) => {
     dispatch(updateContractorStatus({ userId, newState }));

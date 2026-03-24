@@ -1,7 +1,9 @@
 const User = require('../models/User');
 const GrieVance = require('../models/Grievance');
 const Location = require('../models/Location');
+const Notification = require('../models/Notification');
 const { sendEmail } = require('../utils/email');
+const { notifyUser } = require('../utils/socket');
 
 // ============= ADMIN CONTROLLERS =============
 
@@ -305,6 +307,42 @@ exports.approveGrievance = async (req, res) => {
             console.warn('Failed to send approval email:', emailErr);
         }
 
+        // Send email and socket notification to the contractor
+        try {
+            if (grievance.assignedContractor && grievance.assignedContractor.email) {
+                // Email
+                await sendEmail({
+                    to: grievance.assignedContractor.email,
+                    subject: `Work Approved: ${grievance.ticketID}`,
+                    html: `
+                        <h2>Great job! Your work was approved.</h2>
+                        <p>Hello ${grievance.assignedContractor.fName},</p>
+                        <p>Your resolution for task <strong>${grievance.ticketID}</strong> has been reviewed and approved by the admin team.</p>
+                        <p><strong>Feedback:</strong> ${grievance.adminFeedback}</p>
+                        <p>Thank you for your excellent service!</p>
+                        <p>Best regards,<br/>CampusCare Team</p>
+                    `
+                });
+
+                // Real-time socket notification
+                notifyUser(grievance.assignedContractor._id, 'grievanceApproved', {
+                    ticketID: grievance.ticketID,
+                    subject: grievance.subject,
+                    feedback: grievance.adminFeedback
+                });
+
+                // Persistent Database Notification
+                await Notification.create({
+                    recipient: grievance.assignedContractor._id,
+                    message: `Work Approved: ${grievance.subject}`,
+                    type: 'approval',
+                    relatedTicketID: grievance.ticketID
+                });
+            }
+        } catch (contractorNotifErr) {
+            console.warn('Failed to notify contractor of approval:', contractorNotifErr);
+        }
+
         res.status(200).json({
             message: 'Grievance approved and student notified',
             grievance: {
@@ -344,24 +382,47 @@ exports.rejectGrievance = async (req, res) => {
 
         grievance.status = 'in-progress';
         grievance.adminFeedback = adminFeedback;
+        
+        // Remove the resolved photo since it was rejected
+        grievance.resolvedPhoto = null;
+        
         await grievance.save();
 
-        // Send email to contractor
+        // 1. Send email to contractor
         try {
-            await sendEmail({
-                to: grievance.assignedContractor.email,
-                subject: `Grievance Needs Revision: ${grievance.ticketID}`,
-                html: `
-                    <h2>Work Needs Revision</h2>
-                    <p>Hello ${grievance.assignedContractor.fName},</p>
-                    <p>Your work on grievance <strong>${grievance.ticketID}</strong> has been reviewed and requires some adjustments.</p>
-                    <p><strong>Feedback:</strong> ${adminFeedback}</p>
-                    <p>Please make the necessary corrections and resubmit.</p>
-                    <p>Thank you,<br/>CampusCare Team</p>
-                `
-            });
-        } catch (emailErr) {
-            console.warn('Failed to send rejection email:', emailErr);
+            if (grievance.assignedContractor && grievance.assignedContractor.email) {
+                const { sendEmail } = require('../utils/email');
+                await sendEmail({
+                    to: grievance.assignedContractor.email,
+                    subject: `Work Rejected: ${grievance.ticketID}`,
+                    html: `
+                        <h2>Work Requires Revision</h2>
+                        <p>Hello ${grievance.assignedContractor.fName},</p>
+                        <p>Your resolution for task <strong>${grievance.ticketID}</strong> has been reviewed but not approved.</p>
+                        <p><strong>Admin Feedback:</strong> ${grievance.adminFeedback}</p>
+                        <p>The task has been moved back to "In Progress". Please review the feedback and submit a new resolution photo once fixed.</p>
+                        <p>Best regards,<br/>CampusCare Team</p>
+                    `
+                });
+
+                // 2. Real-time socket notification
+                const { notifyUser } = require('../utils/socket');
+                notifyUser(grievance.assignedContractor._id, 'workRejected', {
+                    ticketID: grievance.ticketID,
+                    subject: grievance.subject,
+                    feedback: grievance.adminFeedback
+                });
+
+                // 3. Persistent Database Notification
+                await Notification.create({
+                    recipient: grievance.assignedContractor._id,
+                    message: `Work Rejected: ${grievance.subject} - ${grievance.adminFeedback}`,
+                    type: 'system',
+                    relatedTicketID: grievance.ticketID
+                });
+            }
+        } catch (contractorNotifErr) {
+            console.warn('Failed to notify contractor of rejection:', contractorNotifErr);
         }
 
         res.status(200).json({
@@ -395,11 +456,25 @@ exports.getPendingApprovals = async (req, res) => {
                 _id: g._id,
                 ticketID: g.ticketID,
                 subject: g.subject,
-                submittedBy: g.submittedBy,
-                assignedContractor: g.assignedContractor,
-                location: g.locationId?.locationName,
-                resolvedPhoto: g.resolvedPhoto,
+                category: g.category,
+                priority: g.priority,
+                criticality: g.criticality,
                 status: g.status,
+                location: g.locationId?.locationName,
+                floor: g.locationId?.floorNumber,
+                submittedBy: g.submittedBy ? {
+                    id: g.submittedBy._id,
+                    name: `${g.submittedBy.fName} ${g.submittedBy.lastName}`
+                } : null,
+                assignedContractor: g.assignedContractor ? {
+                    id: g.assignedContractor._id,
+                    name: `${g.assignedContractor.fName} ${g.assignedContractor.lastName}`
+                } : null,
+                initialPhoto: g.initialPhoto,
+                resolvedPhoto: g.resolvedPhoto,
+                description: g.description,
+                contractorNotes: g.contractorNotes,
+                createdAt: g.createdAt,
                 updatedAt: g.updatedAt
             }))
         });

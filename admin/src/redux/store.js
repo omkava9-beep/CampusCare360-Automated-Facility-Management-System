@@ -5,6 +5,7 @@ import contractorReducer from './slices/contractorSlice';
 import studentReducer from './slices/studentSlice';
 import locationReducer from './slices/locationSlice';
 
+
 const store = configureStore({
   reducer: {
     auth: authReducer,

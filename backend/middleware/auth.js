@@ -68,9 +68,15 @@ const AdminSignup = async (req, resp) => {
 
 // middleware to check if request carries a valid JWT (from cookies only)
 const authenticateToken = async (req, res, next) => {
-    const token = req.cookies?.token;
+    let token = null;
 
-    if (!token) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies?.token) {
+        token = req.cookies.token;
+    }
+
+    if (!token || token === 'null' || token === 'undefined') {
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
     try {
@@ -87,41 +93,57 @@ const authenticateToken = async (req, res, next) => {
 };
 
 const isAdmin = async (req, res, next) => {
-    let token = req.cookies?.token;
+    let token = null;
 
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    // Prioritize Authorization Header
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
         token = req.headers.authorization.split(' ')[1];
+        console.log("Admin Auth: Found token in Authorization header");
+    } 
+    // Fallback to Cookie
+    else if (req.cookies?.token) {
+        token = req.cookies.token;
+        console.log("Admin Auth: Found token in Cookie");
     }
 
-    if (!token) {
+    if (!token || token === 'null' || token === 'undefined') {
+        console.log("Admin Auth: No valid token format found");
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // decoded contains { userId: ... }
+        console.log("Admin Auth: Token verified for userId:", decoded.userId);
+        
         const user = await User.findById(decoded.userId);
         if (!user) {
+            console.log("Admin Auth: User not found in database for ID:", decoded.userId);
             return res.status(401).json({ message: 'User not found' });
         }
+        
         if (user.role !== 'admin') {
+            console.log("Admin Auth: Access denied. User role is:", user.role);
             return res.status(403).json({ message: 'Access denied' });
         }
-        // attach user to request if needed
+        
         req.user = user;
         next();
     } catch (error) {
+        console.error("Admin Auth: JWT Verification Error:", error.message);
         res.status(401).json({ message: 'Token is not valid' });
     }
 }
 
 const isContractor = async (req, res, next) => {
-    let token = req.cookies?.token;
+    let token = null;
 
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
         token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies?.token) {
+        token = req.cookies.token;
     }
 
-    if (!token) {
+    if (!token || token === 'null' || token === 'undefined') {
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
     try {
@@ -141,13 +163,15 @@ const isContractor = async (req, res, next) => {
     }
 }
 const isStudentOrFaculty = async (req, res, next) => {
-    let token = req.cookies?.token;
+    let token = null;
 
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
         token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies?.token) {
+        token = req.cookies.token;
     }
 
-    if (!token) {
+    if (!token || token === 'null' || token === 'undefined') {
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
     try {

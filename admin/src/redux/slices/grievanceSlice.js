@@ -22,6 +22,25 @@ export const fetchGrievances = createAsyncThunk(
     }
 );
 
+export const fetchPendingApprovals = createAsyncThunk(
+    'grievances/fetchPending',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('adminToken');
+            const response = await fetch(`${API_URL}/admin/grievances/approval/pending`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            if (!response.ok) return rejectWithValue(data.message);
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const fetchStats = createAsyncThunk(
     'grievances/fetchStats',
     async (_, { rejectWithValue }) => {
@@ -106,6 +125,18 @@ const grievanceSlice = createSlice({
                 state.pagination = action.payload.pagination;
             })
             .addCase(fetchGrievances.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            .addCase(fetchPendingApprovals.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchPendingApprovals.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // Replace list with pending approvals (unabridged)
+                state.list = action.payload.grievances;
+            })
+            .addCase(fetchPendingApprovals.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             })

@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const GrieVance = require('../models/Grievance');
 const Location = require('../models/Location');
+const Notification = require('../models/Notification');
 const { v4: uuidv4 } = require('uuid');
 const { uploadToCloudinary, deleteFromCloudinary, getOptimizedUrl } = require('../utils/cloudinaryUpload');
 const { sendEmail } = require('../utils/email');
@@ -189,8 +190,33 @@ exports.addGrievance = async (req, res) => {
                 $push: { assignedGrievances: grievance._id }
             });
 
+            // Create persistent Notification database record
+            try {
+                await Notification.create({
+                    recipient: contractorResult.contractor._id,
+                    message: `New grievance assigned: ${grievance.subject}`,
+                    type: 'assignment',
+                    relatedTicketID: grievance.ticketID
+                });
+            } catch (notifErr) {
+                console.warn('Failed to save notification to DB:', notifErr);
+            }
+
+            // Real-time Socket Emission
+            try {
+                const { notifyUser } = require('../utils/socket');
+                notifyUser(contractorResult.contractor._id, 'newGrievance', {
+                    ticketID: grievance.ticketID,
+                    subject: grievance.subject,
+                    location: location.locationName
+                });
+            } catch (sockErr) {
+                console.warn('Failed to emit socket notification:', sockErr);
+            }
+
             // send notification email to contractor
             try {
+                const { sendEmail } = require('../utils/email');
                 await sendEmail({
                     to: contractorResult.contractor.email,
                     subject: `New grievance assigned: ${grievance.ticketID}`,
@@ -343,9 +369,12 @@ exports.uploadResolvedPhoto = async (req, res) => {
             `grievance-resolved-${grievanceId}`
         );
 
-        // Update grievance with resolved photo
+        // Update grievance with resolved photo and notes
         grievance.resolvedPhoto = uploadResult.url;
         grievance.status = 'done'; // Mark as completed
+        if (req.body.notes) {
+            grievance.contractorNotes = req.body.notes;
+        }
         grievance.resolvedAt = new Date();
         await grievance.save();
 

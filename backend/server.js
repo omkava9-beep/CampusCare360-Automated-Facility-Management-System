@@ -26,9 +26,14 @@ app.get('/' , (req , res) =>{
 })
 
 app.use('/api/v1/user' , userRoutes);;
+const http = require('http');
+const { initSocket } = require('./utils/socket');
+
+const server = http.createServer(app);
+initSocket(server);
+
 connectDb();
 
-
-app.listen(port , () => {
-    console.log('app running on port ' + port);
+server.listen(port, () => {
+    console.log('Server running on port ' + port);
 });
