@@ -182,9 +182,159 @@
     }
 }
 
+/* ============================================================
+   CONTRACTOR REGISTRATION FORM MODAL
+   ============================================================ */
+
+.modal-content[style*="720px"] {
+    max-width: 720px !important;
+    max-height: 90vh;
+    overflow: visible;
+}
+
+.modal-overlay .modal-content .modal-form {
+    padding: 0 32px 24px 32px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0;
+    padding: 28px 32px;
+    border-bottom: 2px solid rgba(56, 139, 253, 0.15);
+    background: linear-gradient(135deg, rgba(56, 139, 253, 0.02) 0%, rgba(163, 113, 247, 0.01) 100%);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    flex: 1;
+}
+
+.modal-header svg {
+    flex-shrink: 0;
+    animation: slideInLeft 0.4s ease 0.1s backwards;
+}
+
+.close-modal {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.close-modal:hover {
+    background: rgba(248, 81, 73, 0.15);
+    border-color: #f85149;
+    color: #f85149;
+    transform: scale(1.05);
+}
+
+.close-modal:active {
+    transform: scale(0.95);
+}
+
+.full-width {
+    width: 100%;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #388bfd 0%, #6c5ce7 100%);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.full-width:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(56, 139, 253, 0.35);
+}
+
+.full-width:active {
+    transform: translateY(0);
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .modal-content[style*="720px"] {
+        max-width: calc(100vw - 40px) !important;
+    }
+    
+    .modal-header {
+        padding: 20px 24px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-form {
+        padding: 0 24px 20px 24px !important;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 480px) {
     .primary-button {
         width: 100%;
         justify-content: center;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content[style*="720px"] {
+        max-width: 95vw !important;
+        border-radius: 16px;
+        margin: 10px;
+    }
+    
+    .modal-header {
+        padding: 16px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .modal-header h2 {
+        font-size: 1rem;
+    }
+    
+    .close-modal {
+        position: absolute;
+        top: 16px;
+        right: 16px;
     }
 }

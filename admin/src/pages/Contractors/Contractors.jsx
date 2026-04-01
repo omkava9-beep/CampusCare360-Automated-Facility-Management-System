@@ -248,144 +248,171 @@ const Contractors = () => {
 
       {showModal && (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ maxWidth: '600px' }}>
+            <div className="modal-content glass-panel" style={{ maxWidth: '720px' }}>
                 <div className="modal-header">
                     <UserPlus size={24} color="#388bfd" />
                     <h2>Contractor Registration</h2>
                     <button className="close-modal" onClick={() => setShowModal(false)}><X size={20}/></button>
                 </div>
                 <form onSubmit={handleOnboard} className="modal-form">
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label><UserCheck size={14} /> First Name</label>
-                            <input 
-                                type="text" 
-                                placeholder="John"
-                                value={formData.fName}
-                                onChange={(e) => setFormData({...formData, fName: e.target.value})}
-                                required
-                            />
+                    {/* Personal Information Section */}
+                    <div>
+                        <div className="form-section-title">
+                            <UserCheck size={16} />
+                            <span>Personal Information</span>
                         </div>
-                        <div className="form-group">
-                            <label>Last Name</label>
-                            <input 
-                                type="text" 
-                                placeholder="Doe"
-                                value={formData.lastName}
-                                onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label><Mail size={14} /> Email</label>
-                            <input 
-                                type="email" 
-                                placeholder="contractor@service.com"
-                                value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label><ShieldAlert size={14} /> Password</label>
-                            <input 
-                                type="password" 
-                                placeholder="••••••••"
-                                value={formData.password}
-                                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label><Award size={14} /> Specialization</label>
-                            <input 
-                                type="text" 
-                                placeholder="Plumbing, Electrical..."
-                                value={formData.specialization}
-                                onChange={(e) => setFormData({...formData, specialization: e.target.value})}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Base Floor</label>
-                            <input 
-                                type="number" 
-                                placeholder="0"
-                                value={formData.currentFloor}
-                                onChange={(e) => setFormData({...formData, currentFloor: e.target.value})}
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div className="form-section-title">
-                        <Navigation size={16} />
-                        <span>Work Assignement Area (Inside Campus)</span>
-                    </div>
-                    
-                    <div className="map-picker-container glass-panel">
-                        <MapContainer 
-                            center={COLLEGE_CENTER} 
-                            zoom={18} 
-                            style={{ height: '350px', width: '100%', borderRadius: '12px' }}
-                            scrollWheelZoom={false}
-                        >
-                            <TileLayer
-                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                                attribution='&copy; <a href="https://www.esri.com/">Esri</a>, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
-                            />
-                            {/* Hybrid Labels Layer (Roads, Buildings, Places) */}
-                            <TileLayer
-                                url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
-                                attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
-                                opacity={0.8}
-                            />
-                            <Circle 
-                                center={COLLEGE_CENTER} 
-                                radius={GEOFENCE_RADIUS}
-                                pathOptions={{ color: '#388bfd', fillColor: '#388bfd', fillOpacity: 0.1 }}
-                            />
-                            <LocationPicker 
-                                position={formData.latitude ? { lat: formData.latitude, lng: formData.longitude } : null} 
-                                setPosition={setMapPosition} 
-                            />
-                            <MapResizer />
-                        </MapContainer>
-                        <div className="map-hint">
-                            Click inside the blue circle to set the contractor's primary reporting zone.
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>First Name</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="John"
+                                    value={formData.fName}
+                                    onChange={(e) => setFormData({...formData, fName: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Last Name</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Doe"
+                                    value={formData.lastName}
+                                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                                    required
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="form-row mt-3">
-                        <div className="form-group">
-                            <label><MapPin size={14} /> Latitude</label>
-                            <input 
-                                type="number" 
-                                step="any"
-                                placeholder="Auto-set by map"
-                                value={formData.latitude}
-                                readOnly
-                                required
-                            />
+                    {/* Account Credentials Section */}
+                    <div>
+                        <div className="form-section-title">
+                            <Mail size={16} />
+                            <span>Account Credentials</span>
                         </div>
-                        <div className="form-group">
-                            <label>Longitude</label>
-                            <input 
-                                type="number" 
-                                step="any"
-                                placeholder="Auto-set by map"
-                                value={formData.longitude}
-                                readOnly
-                                required
-                            />
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>Email Address</label>
+                                <input 
+                                    type="email" 
+                                    placeholder="contractor@service.com"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Password</label>
+                                <input 
+                                    type="password" 
+                                    placeholder="••••••••"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Professional Details Section */}
+                    <div>
+                        <div className="form-section-title">
+                            <Award size={16} />
+                            <span>Professional Details</span>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>Specialization</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g., Plumbing, Electrical"
+                                    value={formData.specialization}
+                                    onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Base Floor / Department</label>
+                                <input 
+                                    type="number" 
+                                    placeholder="0"
+                                    value={formData.currentFloor}
+                                    onChange={(e) => setFormData({...formData, currentFloor: e.target.value})}
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Location Assignment Section */}
+                    <div>
+                        <div className="form-section-title">
+                            <Navigation size={16} />
+                            <span>Work Assignment Zone</span>
+                        </div>
+                        <div className="map-picker-container glass-panel">
+                            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                                Click inside the blue circle to assign the contractor's primary reporting location within campus
+                            </p>
+                            <MapContainer 
+                                center={COLLEGE_CENTER} 
+                                zoom={18} 
+                                style={{ height: '320px', width: '100%', borderRadius: '12px', marginBottom: '8px' }}
+                                scrollWheelZoom={false}
+                            >
+                                <TileLayer
+                                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                    attribution='&copy; <a href="https://www.esri.com/">Esri</a>, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
+                                />
+                                <TileLayer
+                                    url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                                    attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
+                                    opacity={0.8}
+                                />
+                                <Circle 
+                                    center={COLLEGE_CENTER} 
+                                    radius={GEOFENCE_RADIUS}
+                                    pathOptions={{ color: '#388bfd', fillColor: '#388bfd', fillOpacity: 0.1 }}
+                                />
+                                <LocationPicker 
+                                    position={formData.latitude ? { lat: formData.latitude, lng: formData.longitude } : null} 
+                                    setPosition={setMapPosition} 
+                                />
+                                <MapResizer />
+                            </MapContainer>
+                            <div className="map-hint">
+                                📍 {formData.latitude ? `Location selected: (${parseFloat(formData.latitude).toFixed(4)}, ${parseFloat(formData.longitude).toFixed(4)})` : 'Click on map to select location'}
+                            </div>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label><MapPin size={14} /> Latitude</label>
+                                <input 
+                                    type="number" 
+                                    step="any"
+                                    placeholder="Auto-filled by map"
+                                    value={formData.latitude}
+                                    readOnly
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Longitude</label>
+                                <input 
+                                    type="number" 
+                                    step="any"
+                                    placeholder="Auto-filled by map"
+                                    value={formData.longitude}
+                                    readOnly
+                                    required
+                                />
+                            </div>
                         </div>
                     </div>
 
                     <button type="submit" className="primary-button full-width">
-                        Onboard Service Personnel
+                        🚀 Onboard Service Personnel
                     </button>
                 </form>
             </div>

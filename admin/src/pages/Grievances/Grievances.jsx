@@ -114,7 +114,7 @@ const GrievanceCard = ({ grievance, onReview, onImagePreview }) => {
 
               <div className="grievance-card-footer">
                   <div className="assigned-pill">
-                      {grievance.assignedContractor ? (
+                      {grievance.assignedContractor && typeof grievance.assignedContractor === 'string' ? (
                           <>
                             <div className="avatar-mini">
                                 {grievance.assignedContractor.charAt(0).toUpperCase()}
