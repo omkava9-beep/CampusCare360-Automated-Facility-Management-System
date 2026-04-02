@@ -294,13 +294,21 @@ exports.approveGrievance = async (req, res) => {
                 to: grievance.submittedBy.email,
                 subject: `Grievance Resolved: ${grievance.ticketID}`,
                 html: `
-                    <h2>Your Grievance Has Been Resolved!</h2>
-                    <p>Hello ${grievance.submittedBy.fName},</p>
-                    <p>Your grievance <strong>${grievance.ticketID}</strong> has been successfully resolved by our team.</p>
-                    <p><strong>Issue:</strong> ${grievance.subject}</p>
-                    <p><strong>Feedback:</strong> ${grievance.adminFeedback}</p>
-                    <p>Thank you for reporting this issue. Your feedback helps us improve our facilities.</p>
-                    <p>Best regards,<br/>CampusCare Team</p>
+                    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px;">
+                        <h2 style="color: #3fb950;">Resolution Complete</h2>
+                        <p>Hello ${grievance.submittedBy.fName},</p>
+                        <p><strong>Your grievance has been resolved.</strong></p>
+                        <p>
+                            <strong>Ticket:</strong> ${grievance.ticketID}<br/>
+                            <strong>Issue:</strong> ${grievance.subject}<br/>
+                            <strong>Feedback:</strong> ${grievance.adminFeedback}
+                        </p>
+                        <br/>
+                        <p>We value your experience! Rate the resolution quality on your dashboard so we can improve our services.</p>
+                        <a href="http://localhost:5175/tickets/${grievance._id}" target="_blank" style="display: inline-block; background-color: #388bfd; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 5px;">Review & Rate Resolution</a>
+                        <br/><br/>
+                        <p style="color: #57606a;">Best regards,<br/>CampusCare Team</p>
+                    </div>
                 `
             });
         } catch (emailErr) {

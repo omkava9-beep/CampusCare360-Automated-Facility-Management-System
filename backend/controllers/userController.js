@@ -233,12 +233,37 @@ Thank you,\nCampusCare Team`
         try {
             const student = await User.findById(userId);
             if (student && student.email) {
+                const { sendEmail } = require('../utils/email');
+                
+                // Construct the HTML based on whether a contractor was auto-assigned
+                let assignmentHtml = '';
+                if (contractorResult?.contractor) {
+                    assignmentHtml = `<div style="background-color: #f6f8fa; padding: 12px; border-left: 4px solid #388bfd; margin: 16px 0;">
+                        <strong>A contractor has been assigned to your grievance.</strong><br/>
+                        Technician ${contractorResult.contractor.fName} has been automatically routed to your location and will begin work shortly.
+                    </div>`;
+                } else {
+                    assignmentHtml = `<p>Your ticket is in the queue and an administrator will assign it to a technician shortly.</p>`;
+                }
+
                 await sendEmail({
                     to: student.email,
-                    subject: `Grievance submitted: ${grievance.ticketID}`,
-                    text: `Hello ${student.fName},\n\nYour grievance has been submitted successfully with ticket ID ${grievance.ticketID}.\n
-Location: ${location.locationName} (Floor ${location.floorNumber})\nSubject: ${subject}\nDescription: ${description}\n\nYou will be notified once a contractor begins work.\n
-Thank you,\nCampusCare Team`
+                    subject: `Grievance Submitted: #${grievance.ticketID}`,
+                    html: `
+                        <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px;">
+                            <h2 style="color: #24292f;">Grievance Received</h2>
+                            <p>Hello ${student.fName},</p>
+                            <p><strong>Your grievance #${grievance.ticketID} has been submitted.</strong></p>
+                            <p>
+                                <strong>Issue:</strong> ${subject}<br/>
+                                <strong>Location:</strong> ${location.locationName} (Floor ${location.floorNumber})
+                            </p>
+                            ${assignmentHtml}
+                            <p>You can track the live status of this ticket anytime directly from your Student Portal.</p>
+                            <br/>
+                            <p style="color: #57606a;">Thank you,<br/>CampusCare Team</p>
+                        </div>
+                    `
                 });
             }
         } catch (emailErr) {

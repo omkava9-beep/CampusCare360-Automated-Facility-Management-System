@@ -1,0 +1,199 @@
+/* ═══════════════════════════════════════════════════
+   CAMPUSCARE STUDENT PORTAL — DESIGN TOKENS
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@700;800;900&display=swap');
+
+:root {
+  /* Core Palette */
+  --bg-main:          #06091a;
+  --bg-surface:       rgba(13, 17, 34, 0.92);
+  --bg-card:          rgba(16, 21, 43, 0.75);
+  --border-main:      rgba(255, 255, 255, 0.07);
+
+  /* Brand */
+  --accent-primary:   #388bfd;
+  --accent-secondary: #79c0ff;
+  --accent-glow:      rgba(56, 139, 253, 0.25);
+
+  /* Status Colours */
+  --success:  #3fb950;
+  --warning:  #e3b341;
+  --error:    #f85149;
+  --info:     #58a6ff;
+
+  /* Text */
+  --text-main:      #e6edf3;
+  --text-secondary: #b0bec9;
+  --text-muted:     #6e7681;
+
+  /* Glass */
+  --glass-bg:     rgba(16, 21, 43, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur:   blur(20px);
+
+  /* Fonts */
+  --font-main:    'Inter', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56,139,253,0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(121,192,255,0.06), transparent);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Glass Panel ── */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid rgba(56,139,253,0.2);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.spinner-sm {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+/* ── Full-page loaders ── */
+.full-loader {
+  display: flex; align-items: center; justify-content: center;
+  height: 100vh; gap: 16px; color: var(--text-muted); font-size: 1rem;
+}
+
+/* ── Page animation ── */
+.page-enter { animation: fadeInUp 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+/* ── Status badge colours ── */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3px;
+}
+.status-applied     { background: rgba(56,139,253,0.12);  color: #58a6ff; }
+.status-in-progress { background: rgba(227,179,65,0.12);  color: #e3b341; }
+.status-done        { background: rgba(63,185,80,0.12);   color: #3fb950; }
+.status-resolved    { background: rgba(63,185,80,0.2);    color: #3fb950; }
+
+.priority-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 6px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px;
+}
+.priority-high   { background: rgba(248,81,73,0.12);   color: #f85149; }
+.priority-medium { background: rgba(227,179,65,0.12);  color: #e3b341; }
+.priority-low    { background: rgba(63,185,80,0.12);   color: #3fb950; }
+
+/* ── Buttons ── */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg, #388bfd, #1d4ed8);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 13px 24px; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font-main);
+  transition: all 0.2s; box-shadow: 0 4px 15px rgba(56,139,253,0.3);
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: rgba(255,255,255,0.04); color: var(--text-muted);
+  border: 1px solid var(--border-main); border-radius: 10px;
+  padding: 10px 20px; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; font-family: var(--font-main);
+  transition: all 0.2s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.07); color: #fff; }
+
+.btn-danger {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent; color: var(--error);
+  border: 1px solid rgba(248,81,73,0.3); border-radius: 10px;
+  padding: 10px 20px; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; font-family: var(--font-main); transition: all 0.2s;
+}
+.btn-danger:hover { background: rgba(248,81,73,0.08); }
+
+/* ── Form controls ── */
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-label {
+  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-muted);
+}
+.form-input, .form-select, .form-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-main);
+  border-radius: 10px; padding: 11px 14px;
+  color: var(--text-main); font-family: var(--font-main); font-size: 0.9rem;
+  outline: none; transition: all 0.2s; width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(56,139,253,0.15);
+  background: rgba(56,139,253,0.04);
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+.form-textarea { resize: vertical; min-height: 100px; }
+.form-select { cursor: pointer; }
+.form-select option { background: #0d1122; }
+.form-error { font-size: 0.78rem; color: var(--error); }
+
+/* ── Main layout with bottom nav on mobile ── */
+.student-layout {
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+}
+.student-body {
+  flex: 1;
+  padding-bottom: 80px; /* space for bottom nav */
+  overflow-x: hidden;
+}
+@media (min-width: 768px) {
+  .student-body { padding-bottom: 0; }
+}
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 24px; text-align: center;
+  color: var(--text-muted); gap: 12px;
+}
+.empty-state p { font-size: 0.95rem; }
+.empty-state h3 { font-size: 1.05rem; font-weight: 700; color: var(--text-secondary); }

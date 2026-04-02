@@ -1,0 +1,44 @@
+/* ── Student Layout ────────────────────────────────────────────────────────
+   Wraps Navbar + page content + BottomNav.
+   On mobile, adds bottom padding so content isn't hidden behind BottomNav.
+──────────────────────────────────────────────────────────────────────────── */
+
+.student-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--bg-page, #080a0f);
+    /* Grid mesh overlay — same pattern used on Home/Login left panels */
+    position: relative;
+}
+
+/* Fixed mesh sits behind everything */
+.student-layout::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(99, 143, 255, 0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 143, 255, 0.022) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Main content area ── */
+.student-body {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    /* On mobile, leave room for the 68px bottom nav + safe area */
+    padding-bottom: 0;
+}
+
+/* Mobile: push content above BottomNav */
+@media (max-width: 767px) {
+    .student-body {
+        padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    }
+}

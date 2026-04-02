@@ -16,7 +16,7 @@ const {
 } = require('../controllers/notificationController');
 
 // Student Controller imports
-const { getMyGrievances, getGrievanceDetail, getStudentProfile, updateStudentProfile, uploadProfilePicture, changePassword } = require('../controllers/studentControllers');
+const { getMyGrievances, getGrievanceDetail, getStudentProfile, updateStudentProfile, uploadProfilePicture, changePassword, loginStudent, getLocationById } = require('../controllers/studentControllers');
 
 // Contractor Controller imports
 const { 
@@ -64,12 +64,14 @@ routes.get('/grievance/:grievanceId/photos', authenticateToken, getGrievancePhot
 routes.delete('/grievance/:grievanceId/photo/:photoType', authenticateToken, deleteGrievancePhoto);
 
 // ============= STUDENT ROUTES =============
+routes.post('/student/login', loginStudent);
+routes.get('/student/location/:locationId', getLocationById); // Public - no auth needed
 routes.get('/student/grievances', authenticateToken, getMyGrievances);
 routes.get('/student/grievances/:grievanceId', authenticateToken, getGrievanceDetail);
 routes.get('/student/profile', authenticateToken, getStudentProfile);
 routes.put('/student/profile', authenticateToken, updateStudentProfile);
 routes.post('/student/profile-picture', authenticateToken, upload.single('photo'), uploadProfilePicture);
-routes.post('/contractor/change-password', authenticateToken, contractorChangePassword);
+routes.post('/student/change-password', authenticateToken, changePassword);
 
 // ============= CONTRACTOR ROUTES =============
 routes.get('/contractor/grievances', authenticateToken, getContractorGrievances);

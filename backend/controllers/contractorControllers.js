@@ -115,7 +115,7 @@ exports.updateGrievanceStatus = async (req, res) => {
             return res.status(400).json({ message: 'Invalid status. Must be: applied, in-progress, or done' });
         }
 
-        const grievance = await GrieVance.findById(grievanceId);
+        const grievance = await GrieVance.findById(grievanceId).populate('submittedBy', 'fName lastName email');
 
         if (!grievance) {
             return res.status(404).json({ message: 'Grievance not found' });
@@ -134,6 +134,35 @@ exports.updateGrievanceStatus = async (req, res) => {
         }
 
         await grievance.save();
+
+        // Send email to student
+        if (grievance.submittedBy && grievance.submittedBy.email) {
+            try {
+                let statusMessage = '';
+                if (status === 'in-progress') statusMessage = 'is now <strong>In Progress</strong>. A technician is actively working on it.';
+                else if (status === 'done') statusMessage = 'has been <strong>completed</strong> by the technician and is awaiting final review by the administration.';
+
+                if (statusMessage) { // Don't send if status is somehow still 'applied'
+                    await sendEmail({
+                        to: grievance.submittedBy.email,
+                        subject: `Update on your Grievance: ${grievance.ticketID}`,
+                        html: `
+                            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+                                <h2>Grievance Status Update</h2>
+                                <p>Hello ${grievance.submittedBy.fName},</p>
+                                <p>Your grievance regarding <strong>"${grievance.subject}"</strong> (Ticket ID: ${grievance.ticketID}) ${statusMessage}</p>
+                                ${notes ? `<p><strong>Contractor Notes:</strong><br/><em>${notes}</em></p>` : ''}
+                                <p>You can track the detailed timeline directly in your Student Portal.</p>
+                                <br/>
+                                <p>Best regards,<br/>CampusCare Team</p>
+                            </div>
+                        `
+                    });
+                }
+            } catch (emailErr) {
+                console.warn('Failed to send status update email to student:', emailErr);
+            }
+        }
 
         res.status(200).json({
             message: 'Grievance status updated successfully',
