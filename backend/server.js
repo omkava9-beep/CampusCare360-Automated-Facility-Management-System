@@ -1,6 +1,13 @@
 // load environment variables from .env file
 require('dotenv').config();
 
+// Log environment info on startup
+console.log('=== Server Startup ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('VERCEL:', !!process.env.VERCEL);
+console.log('MONGO_URI:', process.env.MONGO_URI ? 'Set' : 'NOT SET ⚠️');
+console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Set' : 'NOT SET ⚠️');
+
 const express = require('express');
 const cors = require('cors');
 const connectDb = require('./config/db');
