@@ -23,7 +23,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
-  'https://campuscare-admin.vercel.app',
+  'https://admin-360-campuscare.vercel.app/login',
   'https://campuscare-frontend.vercel.app',
   'https://campuscare-student.vercel.app'
 ];
