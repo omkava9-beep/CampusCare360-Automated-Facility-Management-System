@@ -25,7 +25,26 @@ app.get('/' , (req , res) =>{
     res.send('hello world');
 })
 
-app.use('/api/v1/user' , userRoutes);;
+app.get('/health', async (req, res) => {
+    const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+    res.json({
+        status: 'ok',
+        database: dbStatus,
+        environment: process.env.NODE_ENV,
+        vercel: !!process.env.VERCEL
+    });
+});
+
+app.use('/api/v1/user' , userRoutes);
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error('Unhandled Server Error:', err.stack);
+    res.status(500).json({ 
+        message: 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
+});
 const http = require('http');
 const { initSocket } = require('./utils/socket');
 

@@ -1,10 +1,14 @@
 
 const mongoose = require('mongoose');
 const connectDb = ()=>{
-    mongoose.connect(process.env.MONGO_URI).then(()=>{
-        console.log('MongoDb Connection successful');
+    console.log('Connecting to MongoDB Atlas...');
+    mongoose.connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 5000 // Fast fail
+    }).then(()=>{
+        console.log('--- MongoDB Connection Successful ---');
     }).catch((err)=>{
-        console.log('error'+err);
+        console.error('--- MongoDB Connection FAILED ---');
+        console.error('Error detail:', err.message);
     })
 }
 
