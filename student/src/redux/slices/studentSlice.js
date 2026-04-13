@@ -13,6 +13,7 @@ export const loginStudent = createAsyncThunk('student/login', async ({ email, pa
         const res = await fetch(USER_API.STUDENT_LOGIN, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ email, password })
         });
         const data = await res.json();

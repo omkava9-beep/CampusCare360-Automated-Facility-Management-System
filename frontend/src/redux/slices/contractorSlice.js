@@ -11,7 +11,10 @@ export const fetchStats = createAsyncThunk(
     'contractor/fetchStats',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${API_URL}/stats`, { headers: getAuthHeader() });
+            const response = await fetch(`${API_URL}/stats`, { 
+                headers: getAuthHeader(),
+                credentials: 'include'
+            });
             const data = await response.json();
             if (!response.ok) return rejectWithValue(data.message);
             return data.stats;
@@ -26,7 +29,10 @@ export const fetchGrievances = createAsyncThunk(
     async (status, { rejectWithValue }) => {
         try {
             const url = status ? `${API_URL}/grievances?status=${status}` : `${API_URL}/grievances`;
-            const response = await fetch(url, { headers: getAuthHeader() });
+            const response = await fetch(url, { 
+                headers: getAuthHeader(),
+                credentials: 'include'
+            });
             const data = await response.json();
             if (!response.ok) return rejectWithValue(data.message);
             return data.grievances;
