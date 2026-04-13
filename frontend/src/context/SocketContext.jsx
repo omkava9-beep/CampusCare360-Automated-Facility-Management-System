@@ -11,19 +11,38 @@ export const SocketProvider = ({ children }) => {
     const { user, isAuthenticated } = useAuth();
 
     useEffect(() => {
-        if (isAuthenticated && user) {
-            const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
-            const newSocket = io(apiUrl, {
-                withCredentials: true,
-            });
+        // Socket.IO only works in development or with a dedicated socket server
+        // Vercel serverless doesn't support WebSocket connections
+        const isDevelopment = import.meta.env.MODE === 'development';
+        
+        if (isAuthenticated && user && isDevelopment) {
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+                const newSocket = io(apiUrl, {
+                    withCredentials: true,
+                    reconnection: true,
+                    reconnectionDelay: 1000,
+                });
 
-            newSocket.on('connect', () => {
-                newSocket.emit('join', user._id);
-            });
+                newSocket.on('connect', () => {
+                    console.log('✓ Socket connected');
+                    newSocket.emit('join', user._id);
+                });
 
-            setSocket(newSocket);
+                newSocket.on('error', (error) => {
+                    console.warn('Socket error:', error);
+                });
 
-            return () => newSocket.close();
+                setSocket(newSocket);
+
+                return () => {
+                    newSocket.close();
+                    setSocket(null);
+                };
+            } catch (error) {
+                console.warn('Socket.IO not available in production:', error);
+                setSocket(null);
+            }
         }
     }, [isAuthenticated, user]);
 
