@@ -18,6 +18,7 @@ import {
   PieChart, Pie, Cell, Legend, BarChart, Bar
 } from 'recharts';
 import { useAuth } from '../../hooks/useAuth';
+import logo from '../../assets/PPSUNAACA+Logo.png';
 import './Dashboard.css';
 
 /* ── Custom chart tooltip matching admin style ── */
@@ -321,10 +322,20 @@ const Dashboard = () => {
         }
     }, [socket, dispatch]);
 
-    // Close sidebar on route change (for mobile)
+    // Close sidebar on route change (mobile)
     useEffect(() => {
         setSidebarOpen(false);
     }, [location.pathname]);
+
+    // Lock body scroll when mobile sidebar is open
+    useEffect(() => {
+        if (sidebarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [sidebarOpen]);
 
     const handleToggleAvailability = () => {
         const newStatus = isAvailable ? 'Inactive' : 'Active';
@@ -348,8 +359,8 @@ const Dashboard = () => {
             <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
                     <div className="sidebar-logo">
-                        <span className="logo-box">C</span>
-                        <span className="brand-name">CampusCare</span>
+                        <img src={logo} alt="Logo" className="db-logo-img db-logo-full" />
+                        <div className="db-logo-short">C</div>
                     </div>
                 </div>
 

@@ -4,6 +4,8 @@ import { Bell, MapPin, User, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import './Navbar.css';
 
+import logo from '../assets/PPSUNAACA+Logo.png';
+
 const Navbar = ({ locationId }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -12,8 +14,7 @@ const Navbar = ({ locationId }) => {
     return (
         <header className="student-navbar">
             <div className="snav-brand" onClick={() => navigate('/')}>
-                <div className="snav-logo-box">C</div>
-                <span className="snav-brand-name">CampusCare</span>
+                <img src={logo} alt="Logo" className="snav-logo-img" />
             </div>
 
             {currentLocation && (

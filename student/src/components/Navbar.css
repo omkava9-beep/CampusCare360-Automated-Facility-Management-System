@@ -37,35 +37,15 @@
     opacity: 0.82;
 }
 
-/* Logo mark */
-.snav-logo-box {
-    width: 34px;
-    height: 34px;
-    background: var(--accent, #638fff);
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-mono, 'JetBrains Mono', monospace);
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #fff;
+.snav-logo-img {
+    height: 40px;
+    width: auto;
+    max-width: 180px;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 6px 12px;
+    border-radius: 6px;
     flex-shrink: 0;
-    box-shadow: 0 0 18px rgba(99, 143, 255, 0.38);
-    /* Subtle inner highlight */
-    position: relative;
-    overflow: hidden;
-}
-
-.snav-logo-box::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 9px 9px 0 0;
 }
 
 /* Brand name */

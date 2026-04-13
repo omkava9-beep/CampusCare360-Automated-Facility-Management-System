@@ -59,19 +59,24 @@
 }
 
 .icon-wrapper {
-  width: 64px;
-  height: 64px;
-  background: rgba(56, 139, 253, 0.1);
-  border-radius: 16px;
+  width: auto;
+  height: auto;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
-  border: 1px solid rgba(56, 139, 253, 0.2);
+  margin: 0 auto 20px;
+  border: none;
 }
 
-.brand-icon {
-  color: var(--primary);
+.brand-icon-img {
+  height: 64px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 8px 16px;
+  border-radius: 12px;
 }
 
 .login-header h1 {

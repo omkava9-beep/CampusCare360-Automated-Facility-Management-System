@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginStudent, fetchLocation } from '../../redux/slices/studentSlice';
 import { MapPin, Eye, EyeOff, LogIn, Building2 } from 'lucide-react';
+import logo from '../../assets/PPSUNAACA+Logo.png';
 import './Login.css';
 
 const FEATURES = [
@@ -57,9 +58,8 @@ const Login = () => {
 
                 {/* Brand */}
                 <div className="login-brand">
-                    <div className="login-logo">C</div>
+                    <img src={logo} alt="Logo" className="login-logo-img" />
                     <div>
-                        <h1 className="login-title">CampusCare</h1>
                         <p className="login-subtitle">Student Facility Portal</p>
                     </div>
                 </div>

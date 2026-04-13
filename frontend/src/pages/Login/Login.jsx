@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { LogIn, Mail, Lock, Eye, EyeOff, ShieldCheck, HardHat } from 'lucide-react';
-
+import { LogIn, Mail, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import logo from '../../assets/PPSUNAACA+Logo.png';
 import './Login.css';
 import { Navigate, useNavigate } from 'react-router';
 import Dashboard from '../Dashboard/Dashboard';
@@ -37,9 +37,8 @@ const Login = () => {
       <div className="login-card glass-panel">
         <div className="login-header">
           <div className="icon-wrapper">
-             <HardHat size={32} className="brand-icon" />
+             <img src={logo} alt="Logo" className="brand-icon-img" />
           </div>
-          <h1>CampusCare</h1>
           <p className="subtitle">Contractor Service Portal</p>
         </div>
 

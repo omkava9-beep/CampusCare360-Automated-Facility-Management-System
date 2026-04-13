@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import logo from '../../assets/logo.svg';
+import logo from '../../assets/PPSUNAACA+Logo.png';
 import './Login.css';
 
 const Login = () => {
@@ -34,7 +34,6 @@ const Login = () => {
             <div className="logo-circle">
               <img src={logo} alt="CampusCare Logo" className="logo-img" />
             </div>
-            <h1 className="login-title">CampusCare</h1>
             <p className="login-subtitle">Admin Portal</p>
           </div>
 

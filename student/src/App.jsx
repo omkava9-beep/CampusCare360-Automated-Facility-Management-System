@@ -13,10 +13,16 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // Preserve the qr param when redirecting to login
-    const search = location.search;
-    return <Navigate to={`/login${search}`} replace />;
+    // Preserve the ?qr param when redirecting to login
+    return <Navigate to={`/login${location.search}`} replace />;
   }
+
+  // Already logged in + QR param present on the root path → go straight to submit
+  const qr = new URLSearchParams(location.search).get('qr');
+  if (qr && location.pathname === '/') {
+    return <Navigate to={`/submit?qr=${qr}`} replace />;
+  }
+
   return children;
 };
 
