@@ -1,15 +1,13 @@
 
 const mongoose = require('mongoose');
-const connectDb = ()=>{
-    console.log('Connecting to MongoDB Atlas...');
+const connectDb = () => {
+    if (mongoose.connection.readyState >= 1) return;
+
     mongoose.connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 5000 // Fast fail
-    }).then(()=>{
-        console.log('--- MongoDB Connection Successful ---');
-    }).catch((err)=>{
-        console.error('--- MongoDB Connection FAILED ---');
-        console.error('Error detail:', err.message);
+        serverSelectionTimeoutMS: 5000
     })
-}
+    .then(() => console.log('✓ MongoDB Connected'))
+    .catch(err => console.error('✗ MongoDB Connection Error:', err.message));
+};
 
 module.exports = connectDb;
