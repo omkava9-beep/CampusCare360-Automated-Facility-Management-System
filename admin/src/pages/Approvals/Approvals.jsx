@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import './Approvals.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const getApiUrl = () => import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+const API_BASE_URL = getApiUrl();
 
 const getImageUrl = (path) => {
   if (!path) return null;

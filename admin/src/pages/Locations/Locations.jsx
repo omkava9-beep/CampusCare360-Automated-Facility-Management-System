@@ -84,7 +84,8 @@ const Locations = () => {
   };
 
   const handleDownloadQR = (locationId) => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/user/admin/downloadqr/${locationId}`;
+    const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+    window.location.href = `${apiUrl}/api/v1/user/admin/downloadqr/${locationId}`;
   };
 
   return (

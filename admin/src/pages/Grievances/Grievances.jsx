@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import './Grievances.css';
 
+// Remove trailing slash from API URL if present
+const getApiUrl = () => import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+const API_BASE_URL = getApiUrl();
+
 // Status step helper
 const getStepState = (status, step) => {
   const states = {
@@ -34,8 +38,6 @@ const PriorityBadge = ({ priority, status }) => {
   const p = priority?.toLowerCase() || 'low';
   return <span className={`badge-priority priority-${p}`}>{priority}</span>;
 };
-
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const getImageUrl = (path) => {
   if (!path) return null;
