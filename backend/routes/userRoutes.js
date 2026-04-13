@@ -2,7 +2,7 @@ const routes = require('express').Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { AdminSignup, LoginAdmin, isAdmin } = require('../middleware/auth');
+const { AdminSignup, LoginAdmin, isAdmin, isContractor, isStudentOrFaculty, authenticateToken } = require('../middleware/auth');
 const { createUser, updateState, downloadLocationQR, createLocation, getUsersByRole, getAllLocations, getContractorDetailedStats } = require('../controllers/adminControllers');
 const { addGrievance, uploadGrievancePhoto, uploadResolvedPhoto, getGrievancePhotos, deleteGrievancePhoto } = require('../controllers/userController');
 const { authenticateToken } = require('../middleware/auth');
@@ -66,25 +66,25 @@ routes.delete('/grievance/:grievanceId/photo/:photoType', authenticateToken, del
 // ============= STUDENT ROUTES =============
 routes.post('/student/login', loginStudent);
 routes.get('/student/location/:locationId', getLocationById); // Public - no auth needed
-routes.get('/student/grievances', authenticateToken, getMyGrievances);
-routes.get('/student/grievances/:grievanceId', authenticateToken, getGrievanceDetail);
-routes.get('/student/profile', authenticateToken, getStudentProfile);
-routes.put('/student/profile', authenticateToken, updateStudentProfile);
-routes.post('/student/profile-picture', authenticateToken, upload.single('photo'), uploadProfilePicture);
-routes.post('/student/change-password', authenticateToken, changePassword);
+routes.get('/student/grievances', isStudentOrFaculty, getMyGrievances);
+routes.get('/student/grievances/:grievanceId', isStudentOrFaculty, getGrievanceDetail);
+routes.get('/student/profile', isStudentOrFaculty, getStudentProfile);
+routes.put('/student/profile', isStudentOrFaculty, updateStudentProfile);
+routes.post('/student/profile-picture', isStudentOrFaculty, upload.single('photo'), uploadProfilePicture);
+routes.post('/student/change-password', isStudentOrFaculty, changePassword);
 
 // ============= CONTRACTOR ROUTES =============
-routes.get('/contractor/grievances', authenticateToken, getContractorGrievances);
-routes.get('/contractor/grievances/:grievanceId', authenticateToken, getContractorGrievanceDetail);
-routes.put('/contractor/grievances/:grievanceId/status', authenticateToken, updateGrievanceStatus);
-routes.put('/contractor/grievances/:grievanceId/accept', authenticateToken, acceptGrievance);
-routes.put('/contractor/grievances/:grievanceId/reject', authenticateToken, contractorRejectGrievance);
-routes.put('/contractor/availability', authenticateToken, toggleAvailability);
-routes.get('/contractor/stats', authenticateToken, getContractorStats);
-routes.get('/contractor/profile', authenticateToken, getContractorProfile);
-routes.put('/contractor/profile', authenticateToken, updateContractorProfile);
-routes.post('/contractor/profile-picture', authenticateToken, upload.single('photo'), uploadContractorProfile);
-routes.post('/contractor/change-password', authenticateToken, contractorChangePassword);
+routes.get('/contractor/grievances', isContractor, getContractorGrievances);
+routes.get('/contractor/grievances/:grievanceId', isContractor, getContractorGrievanceDetail);
+routes.put('/contractor/grievances/:grievanceId/status', isContractor, updateGrievanceStatus);
+routes.put('/contractor/grievances/:grievanceId/accept', isContractor, acceptGrievance);
+routes.put('/contractor/grievances/:grievanceId/reject', isContractor, contractorRejectGrievance);
+routes.put('/contractor/availability', isContractor, toggleAvailability);
+routes.get('/contractor/stats', isContractor, getContractorStats);
+routes.get('/contractor/profile', isContractor, getContractorProfile);
+routes.put('/contractor/profile', isContractor, updateContractorProfile);
+routes.post('/contractor/profile-picture', isContractor, upload.single('photo'), uploadContractorProfile);
+routes.post('/contractor/change-password', isContractor, contractorChangePassword);
 
 const { sendMessage, getMessages } = require('../controllers/chatController');
 
