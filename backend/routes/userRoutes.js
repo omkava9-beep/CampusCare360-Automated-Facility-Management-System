@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const { AdminSignup, LoginAdmin, isAdmin, isContractor, isStudentOrFaculty, authenticateToken } = require('../middleware/auth');
 const { createUser, updateState, downloadLocationQR, createLocation, getUsersByRole, getAllLocations, getContractorDetailedStats } = require('../controllers/adminControllers');
 const { addGrievance, uploadGrievancePhoto, uploadResolvedPhoto, getGrievancePhotos, deleteGrievancePhoto } = require('../controllers/userController');
-const { authenticateToken } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 // Notification Controller imports
