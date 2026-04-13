@@ -51,10 +51,12 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Initialize database connection
 connectDb();
 
 // Local-only server initialization (Socket.io)
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+// Only run HTTP server locally, not on Vercel serverless
+if (!process.env.VERCEL) {
     const http = require('http');
     const { initSocket } = require('./utils/socket');
     const server = http.createServer(app);
@@ -65,4 +67,5 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
     });
 }
 
+// Export app for Vercel serverless functions
 module.exports = app;
