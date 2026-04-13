@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/user/contractor`;
+// Remove trailing slash from API URL if present
+const getApiUrl = () => import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+const API_URL = `${getApiUrl()}/api/v1/user/contractor`;
 
 const getAuthHeader = () => ({
     'Authorization': `Bearer ${localStorage.getItem('contractorToken')}`,
@@ -163,7 +165,8 @@ export const fetchNotifications = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('contractorToken');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/notifications`, {
+            const apiUrl = getApiUrl();
+            const response = await fetch(`${apiUrl}/api/v1/user/notifications`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -180,7 +183,8 @@ export const markNotificationAsRead = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('contractorToken');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/notifications/${id}/read`, {
+            const apiUrl = getApiUrl();
+            const response = await fetch(`${apiUrl}/api/v1/user/notifications/${id}/read`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -198,7 +202,8 @@ export const clearAllNotifications = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('contractorToken');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/notifications/read-all`, {
+            const apiUrl = getApiUrl();
+            const response = await fetch(`${apiUrl}/api/v1/user/notifications/read-all`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

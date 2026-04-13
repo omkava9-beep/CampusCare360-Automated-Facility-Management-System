@@ -5,7 +5,9 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/admin/login`, {
+      // Remove trailing slash from API URL if present
+      const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+      const response = await fetch(`${apiUrl}/api/v1/user/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

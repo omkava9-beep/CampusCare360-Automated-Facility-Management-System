@@ -23,9 +23,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
-  'https://admin-360-campuscare.vercel.app/login',
-  'https://campuscare-frontend.vercel.app',
-  'https://campuscare-student.vercel.app'
+  'http://localhost:3001'
 ];
 
 app.use(cors({
@@ -33,11 +31,16 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || origin === 'true') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Allow all localhost origins
+    if (origin.startsWith('http://localhost')) return callback(null, true);
+    
+    // Allow all vercel.app domains (for all frontend deployments)
+    if (origin.includes('vercel.app')) return callback(null, true);
+    
+    // Check hardcoded origins
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

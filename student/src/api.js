@@ -1,6 +1,8 @@
 // student/src/api.js
 
-export const BASE_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
+// Remove trailing slash from API URL if present
+const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+export const BASE_URL = `${apiUrl}/api/v1`;
 
 export const USER_API = {
     STUDENT_LOGIN: `${BASE_URL}/user/student/login`,

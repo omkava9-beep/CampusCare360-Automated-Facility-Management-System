@@ -73,7 +73,8 @@ const GrievanceDetail = () => {
             formData.append('notes', notes); // Contractor notes included alongside the photo
 
             const token = localStorage.getItem('contractorToken');
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/grievance/${id}/upload-resolved-photo`, {
+            const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+            const res = await fetch(`${apiUrl}/api/v1/user/grievance/${id}/upload-resolved-photo`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

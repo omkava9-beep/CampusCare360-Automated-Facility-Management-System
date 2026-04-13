@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/user`;
+// Remove trailing slash from API URL if present
+const getApiUrl = () => import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+const API_URL = `${getApiUrl()}/api/v1/user`;
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
