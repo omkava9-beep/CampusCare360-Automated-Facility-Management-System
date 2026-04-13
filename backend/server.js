@@ -12,7 +12,7 @@ const cookieParser = require('cookie-parser');
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:3000'],
+  origin: true, // Allow all origins in production, or configure specifically
   credentials: true,
 }));
 
@@ -34,6 +34,10 @@ initSocket(server);
 
 connectDb();
 
-server.listen(port, () => {
-    console.log('Server running on port ' + port);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    server.listen(port, () => {
+        console.log('Server running on port ' + port);
+    });
+}
+
+module.exports = app;

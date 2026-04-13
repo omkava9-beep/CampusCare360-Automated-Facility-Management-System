@@ -1,6 +1,6 @@
 // student/src/api.js
 
-export const BASE_URL = 'http://localhost:4000/api/v1';
+export const BASE_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
 
 export const USER_API = {
     STUDENT_LOGIN: `${BASE_URL}/user/student/login`,

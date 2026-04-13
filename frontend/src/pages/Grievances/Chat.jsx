@@ -16,7 +16,7 @@ const Chat = ({ grievanceId, currentUser }) => {
 
     useEffect(() => {
         // Fetch existing messages
-        fetch(`http://localhost:4000/api/v1/user/chat/${grievanceId}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/chat/${grievanceId}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('contractorToken')}` }
         })
         .then(res => res.json())
@@ -39,7 +39,7 @@ const Chat = ({ grievanceId, currentUser }) => {
         if (!newMessage.trim()) return;
 
         try {
-            const response = await fetch(`http://localhost:4000/api/v1/user/chat/send`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/chat/send`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${localStorage.getItem('contractorToken')}`,

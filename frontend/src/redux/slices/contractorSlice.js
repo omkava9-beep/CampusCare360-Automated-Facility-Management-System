@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_URL = 'http://localhost:4000/api/v1/user/contractor';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/user/contractor`;
 
 const getAuthHeader = () => ({
     'Authorization': `Bearer ${localStorage.getItem('contractorToken')}`,
@@ -157,7 +157,7 @@ export const fetchNotifications = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('contractorToken');
-            const response = await fetch(`http://localhost:4000/api/v1/user/notifications`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/notifications`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -174,7 +174,7 @@ export const markNotificationAsRead = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('contractorToken');
-            const response = await fetch(`http://localhost:4000/api/v1/user/notifications/${id}/read`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/notifications/${id}/read`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -192,7 +192,7 @@ export const clearAllNotifications = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('contractorToken');
-            const response = await fetch(`http://localhost:4000/api/v1/user/notifications/read-all`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/notifications/read-all`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
