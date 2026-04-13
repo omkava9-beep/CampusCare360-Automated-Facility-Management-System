@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const GrieVance = require('../models/Grievance');
 const Location = require('../models/Location');
 const Notification = require('../models/Notification');
-const { v4: uuidv4 } = require('uuid');
 const { uploadToCloudinary, deleteFromCloudinary, getOptimizedUrl } = require('../utils/cloudinaryUpload');
 const { sendEmail } = require('../utils/email');
 
