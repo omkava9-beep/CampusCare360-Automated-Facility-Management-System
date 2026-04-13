@@ -8,25 +8,36 @@ const LoginAdmin = async (req, resp) => {
     const { email, password } = req.body;
 
     try {
+        if (!email || !password) {
+            return resp.status(400).json({ message: 'Email and password are required' });
+        }
+
         const user = await User.findOne({ email }); // look up by email field
         if (!user) {
             return resp.status(404).json({ message: 'User not found' });
         }
-        // if(user.role !== 'admin'){
-        //     return resp.status(403).json({message: 'Access denied'});
-        // }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return resp.status(400).json({ message: 'Invalid credentials' });
         }
+
+        if (!process.env.JWT_SECRET) {
+            console.error('❌ JWT_SECRET not set in environment');
+            return resp.status(500).json({ message: 'Server configuration error' });
+        }
+
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-        // set httpOnly cookie with token
+        
+        // Set httpOnly cookie with token
         resp.cookie('token', token, {
             httpOnly: true,
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            secure: process.env.NODE_ENV === 'production'
-        }).json({
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
+        });
+
+        return resp.status(200).json({
             message: 'Login successful',
             token: token,
             admin: {
@@ -39,7 +50,9 @@ const LoginAdmin = async (req, resp) => {
             }
         });
     } catch (error) {
-        resp.status(500).json({ message: 'Server error' });
+        console.error('❌ Login Error:', error.message);
+        console.error('Error Stack:', error.stack);
+        resp.status(500).json({ message: 'Server error', error: process.env.NODE_ENV === 'development' ? error.message : undefined });
     }
 }
 const AdminSignup = async (req, resp) => {
