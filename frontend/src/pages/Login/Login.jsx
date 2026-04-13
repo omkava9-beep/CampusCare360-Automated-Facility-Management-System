@@ -22,7 +22,6 @@ const Login = () => {
   useEffect(() => {
     if (isAuthenticated) {
         // Redirect will be handled by App.jsx or Router
-        console.log('Contractor Authenticated');
         navigate('/');
     }
   }, [isAuthenticated, navigate]);

@@ -4,6 +4,7 @@ import grievanceReducer from './slices/grievanceSlice';
 import contractorReducer from './slices/contractorSlice';
 import studentReducer from './slices/studentSlice';
 import locationReducer from './slices/locationSlice';
+import { authMiddleware } from './middleware/authMiddleware';
 
 
 const store = configureStore({
@@ -14,6 +15,8 @@ const store = configureStore({
     students: studentReducer,
     locations: locationReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(authMiddleware),
 });
 
 export default store;

@@ -20,11 +20,11 @@ const LoginAdmin = async (req, resp) => {
         if (!isMatch) {
             return resp.status(400).json({ message: 'Invalid credentials' });
         }
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '250h' });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
         // set httpOnly cookie with token
         resp.cookie('token', token, {
             httpOnly: true,
-            maxAge: 250 * 60 * 60 * 1000, // 250 hours
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             secure: process.env.NODE_ENV === 'production'
         }).json({
             message: 'Login successful',
@@ -98,31 +98,25 @@ const isAdmin = async (req, res, next) => {
     // Prioritize Authorization Header
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
         token = req.headers.authorization.split(' ')[1];
-        console.log("Admin Auth: Found token in Authorization header");
     } 
     // Fallback to Cookie
     else if (req.cookies?.token) {
         token = req.cookies.token;
-        console.log("Admin Auth: Found token in Cookie");
     }
 
     if (!token || token === 'null' || token === 'undefined') {
-        console.log("Admin Auth: No valid token format found");
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("Admin Auth: Token verified for userId:", decoded.userId);
         
         const user = await User.findById(decoded.userId);
         if (!user) {
-            console.log("Admin Auth: User not found in database for ID:", decoded.userId);
             return res.status(401).json({ message: 'User not found' });
         }
         
         if (user.role !== 'admin') {
-            console.log("Admin Auth: Access denied. User role is:", user.role);
             return res.status(403).json({ message: 'Access denied' });
         }
         

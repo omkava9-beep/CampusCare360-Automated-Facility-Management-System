@@ -11,8 +11,6 @@ const { sendEmail } = require('../utils/email');
 
 const createUser = async (req, resp) => {
   const { fName, midName, lastName, email, password, role, specialization, currentFloor, latitude, longitude } = req.body;
-  console.log('--- Create User Request ---');
-  console.log('Body:', JSON.stringify(req.body, null, 2));
 
   try {
     let user = await User.findOne({ email });

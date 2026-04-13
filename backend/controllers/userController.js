@@ -24,41 +24,12 @@ const calculateDistance = (coord1, coord2) => {
 
 // Helper function to find nearest available contractor (no category filtering)
 const findNearestContractor = async (location) => {
-    console.log(`\n[DEBUG] Starting contractor search...`);
-    
-    // First, check ALL contractors
-    const allContractors = await User.find({ role: 'contractor' });
-    console.log(`[DEBUG] Total contractors in DB: ${allContractors.length}`);
-    
-    allContractors.forEach((c, i) => {
-        console.log(`[DEBUG] Contractor ${i}: ${c.fName} ${c.lastName}`);
-        console.log(`  - Status: ${c.status}`);
-        console.log(`  - Has contractorDetails: ${!!c.contractorDetails}`);
-        if (c.contractorDetails) {
-            console.log(`  - Has currentFloor: ${!!c.contractorDetails.currentFloor} (value: ${c.contractorDetails.currentFloor})`);
-            console.log(`  - Has location: ${!!c.contractorDetails.location}`);
-            if (c.contractorDetails.location) {
-                console.log(`  - Has coordinates: ${!!c.contractorDetails.location.coordinates} (value:`, c.contractorDetails.location.coordinates, ')'
-                );
-            }
-        }
-    });
-    
     // Find all active contractors with valid location coordinates (any specialty)
     const contractors = await User.find({
         role: 'contractor',
         status: 'Active',
         'contractorDetails.location.coordinates': { $exists: true }
     });
-
-    console.log(`[DEBUG] Found ${contractors.length} contractors matching ALL criteria`);
-    console.log(`[DEBUG] Location floor: ${location.floorNumber}, coordinates:`, location.coordinates.coordinates);
-    
-    if (contractors.length > 0) {
-        contractors.forEach((c, i) => {
-            console.log(`[DEBUG] Contractor ${i}: ${c.fName} ${c.lastName}, Floor: ${c.contractorDetails.currentFloor}, Coords:`, c.contractorDetails.location.coordinates);
-        });
-    }
 
     if (contractors.length === 0) {
         return null;
