@@ -9,6 +9,7 @@ const port = process.env.PORT || 3000;
 const userRoutes = require('./routes/userRoutes');
 
 const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
 
 // Enable CORS for all routes
 app.use(cors({
@@ -26,13 +27,17 @@ app.get('/' , (req , res) =>{
 })
 
 app.get('/health', async (req, res) => {
-    const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
-    res.json({
-        status: 'ok',
-        database: dbStatus,
-        environment: process.env.NODE_ENV,
-        vercel: !!process.env.VERCEL
-    });
+    try {
+        const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+        res.json({
+            status: 'ok',
+            database: dbStatus,
+            environment: process.env.NODE_ENV,
+            vercel: !!process.env.VERCEL
+        });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
 });
 
 app.use('/api/v1/user' , userRoutes);
@@ -45,15 +50,16 @@ app.use((err, req, res, next) => {
         error: process.env.NODE_ENV === 'development' ? err.message : undefined 
     });
 });
-const http = require('http');
-const { initSocket } = require('./utils/socket');
-
-const server = http.createServer(app);
-initSocket(server);
 
 connectDb();
 
+// Local-only server initialization (Socket.io)
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    const http = require('http');
+    const { initSocket } = require('./utils/socket');
+    const server = http.createServer(app);
+    initSocket(server);
+    
     server.listen(port, () => {
         console.log('Server running on port ' + port);
     });
