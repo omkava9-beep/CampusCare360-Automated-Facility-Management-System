@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "projects": [
+    {
+      "name": "campuscare-backend",
+      "rootDirectory": "backend"
+    },
+    {
+      "name": "campuscare-admin",
+      "rootDirectory": "admin"
+    },
+    {
+      "name": "campuscare-frontend",
+      "rootDirectory": "frontend"
+    },
+    {
+      "name": "campuscare-student",
+      "rootDirectory": "student"
+    }
+  ]
+}

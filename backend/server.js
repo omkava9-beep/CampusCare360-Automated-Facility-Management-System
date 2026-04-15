@@ -35,10 +35,15 @@ app.use(cors({
     if (origin.startsWith('http://localhost')) return callback(null, true);
     
     // Allow all vercel.app domains (for all frontend deployments)
-    if (origin.includes('vercel.app')) return callback(null, true);
+    if (origin && origin.includes('vercel.app')) return callback(null, true);
     
     // Check hardcoded origins
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    
+    // Log CORS rejections in development
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`CORS - Rejecting origin: ${origin}`);
+    }
     
     callback(new Error('Not allowed by CORS'));
   },
