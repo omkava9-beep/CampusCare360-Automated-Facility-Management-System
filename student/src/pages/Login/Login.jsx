@@ -34,7 +34,7 @@ const Login = () => {
 
     useEffect(() => {
         if (qrLocationId) dispatch(fetchLocation(qrLocationId));
-    }, [qrLocationId]);
+    }, [qrLocationId, dispatch]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

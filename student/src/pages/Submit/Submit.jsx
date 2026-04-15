@@ -39,7 +39,7 @@ const Submit = () => {
             setLocationId(qrLocationId);
             dispatch(fetchLocation(qrLocationId));
         }
-    }, [qrLocationId]);
+    }, [qrLocationId, dispatch]);
 
     useEffect(() => {
         return () => dispatch(clearSubmitSuccess());
