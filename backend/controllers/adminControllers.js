@@ -141,10 +141,10 @@ const createLocation = async (req, res) => {
     });
 
     // 3. Generate QR Code;
-    // The URL points to your frontend student portal
-    // The qr parameter contains the location ID that the student needs to fill a grievance for
-    // Example: https://student-app.vercel.app/?qr=LOCATION_ID
-    const frontendUrl = `${process.env.FRONTEND_URL}/?qr=${newLocation._id}`;
+    // The URL points directly to the submit form with the location ID as a query parameter
+    // If not authenticated, the app will redirect to login but preserve the ?qr param
+    // Example: https://student-app.vercel.app/submit?qr=LOCATION_ID
+    const frontendUrl = `${process.env.FRONTEND_URL}/submit?qr=${newLocation._id}`;
 
     // Generate QR as a DataURL (Base64 string) to save in DB
     const qrCodeDataUrl = await QRCode.toDataURL(frontendUrl);
