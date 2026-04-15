@@ -12,18 +12,23 @@ const connectDb = () => {
         return;
     }
 
+    console.log('Attempting MongoDB connection...');
+    console.log('Connection string format:', process.env.MONGO_URI.substring(0, 30) + '...');
+
     mongoose.connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 30000,  // 30 seconds for Vercel cold start
-        socketTimeoutMS: 45000,            // 45 seconds for socket operations
+        serverSelectionTimeoutMS: 30000,
+        socketTimeoutMS: 45000,
         retryWrites: true,
         w: 'majority',
         maxPoolSize: 10
     })
-    .then(() => console.log('✓ MongoDB Connected'))
+    .then(() => {
+        console.log('✓ MongoDB Connected Successfully');
+    })
     .catch(err => {
         console.error('✗ MongoDB Connection Error:', err.message);
-        // Don't throw, allow serverless function to continue
-        // Connection will be retried on next invoke
+        console.error('Error Code:', err.code);
+        console.error('Full Error:', JSON.stringify(err, null, 2));
     });
 };
 
