@@ -13,9 +13,11 @@ const connectDb = () => {
     }
 
     mongoose.connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 30000,  // 30 seconds for Vercel cold start
+        socketTimeoutMS: 45000,            // 45 seconds for socket operations
         retryWrites: true,
-        w: 'majority'
+        w: 'majority',
+        maxPoolSize: 10
     })
     .then(() => console.log('✓ MongoDB Connected'))
     .catch(err => {
