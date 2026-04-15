@@ -63,15 +63,24 @@ app.get('/' , (req , res) =>{
 
 app.get('/health', async (req, res) => {
     try {
+        // Try to ensure connection for this request
+        await connectDb();
+        
         const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
         res.json({
             status: 'ok',
             database: dbStatus,
             environment: process.env.NODE_ENV,
-            vercel: !!process.env.VERCEL
+            vercel: !!process.env.VERCEL,
+            timestamp: new Date().toISOString()
         });
     } catch (err) {
-        res.status(500).json({ status: 'error', message: err.message });
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Health check failed',
+            database: 'Disconnected',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
     }
 });
 
@@ -87,7 +96,22 @@ app.use((err, req, res, next) => {
 });
 
 // Initialize database connection
-connectDb();
+connectDb().catch(err => {
+    console.error('Failed to connect to MongoDB on startup:', err.message);
+    // Don't exit on connection failure - serverless can retry on next invocation
+});
+
+// For each request, ensure database is connected (Vercel serverless)
+app.use((req, res, next) => {
+    if (process.env.VERCEL) {
+        connectDb().then(() => next()).catch(err => {
+            console.error('Request handler - DB connection failed:', err.message);
+            next();
+        });
+    } else {
+        next();
+    }
+});
 
 // Local-only server initialization (Socket.io)
 // Only run HTTP server locally, not on Vercel serverless
