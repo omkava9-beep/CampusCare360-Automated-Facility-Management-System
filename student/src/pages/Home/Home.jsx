@@ -30,6 +30,13 @@ const Home = () => {
 
     const { user, grievances, isLoading, currentLocation } = useSelector(s => s.student);
 
+    // Redirect to Submit form if scanned from QR code
+    useEffect(() => {
+        if (locationId) {
+            navigate(`/submit?qr=${locationId}`, { replace: true });
+        }
+    }, [locationId, navigate]);
+
     useEffect(() => {
         dispatch(fetchMyGrievances({}));
         if (locationId) dispatch(fetchLocation(locationId));
