@@ -227,7 +227,7 @@ const downloadLocationQR = async (req, res) => {
     doc.moveDown(2);
 
     // 4. Generate the QR Code specifically for the PDF
-    const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/report/${location._id}`;
+    const frontendUrl = `${process.env.FRONTEND_URL}/submit?qr=${location._id}`;
     const qrSize = 400; // Increased size
     const qrBuffer = await QRCode.toBuffer(frontendUrl, {
       errorCorrectionLevel: 'H',
