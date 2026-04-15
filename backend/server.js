@@ -63,15 +63,31 @@ app.get('/' , (req , res) =>{
 
 app.get('/health', async (req, res) => {
     try {
-        // Try to ensure connection for this request
-        await connectDb();
+        // Check current connection state  
+        const readyState = mongoose.connection.readyState;
+        // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
         
-        const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+        let dbStatus = 'Disconnected';
+        
+        if (readyState === 1) {
+            dbStatus = 'Connected';
+        } else if (readyState === 0 || readyState === 3) {
+            // Try to reconnect if disconnected
+            try {
+                await connectDb();
+                dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+            } catch (err) {
+                console.error('Health check - Reconnection failed:', err.message);
+                dbStatus = 'Disconnected';
+            }
+        }
+        
         res.json({
             status: 'ok',
             database: dbStatus,
             environment: process.env.NODE_ENV,
             vercel: !!process.env.VERCEL,
+            readyState: readyState,
             timestamp: new Date().toISOString()
         });
     } catch (err) {
@@ -99,18 +115,6 @@ app.use((err, req, res, next) => {
 connectDb().catch(err => {
     console.error('Failed to connect to MongoDB on startup:', err.message);
     // Don't exit on connection failure - serverless can retry on next invocation
-});
-
-// For each request, ensure database is connected (Vercel serverless)
-app.use((req, res, next) => {
-    if (process.env.VERCEL) {
-        connectDb().then(() => next()).catch(err => {
-            console.error('Request handler - DB connection failed:', err.message);
-            next();
-        });
-    } else {
-        next();
-    }
 });
 
 // Local-only server initialization (Socket.io)
