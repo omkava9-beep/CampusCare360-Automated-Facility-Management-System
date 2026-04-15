@@ -4,8 +4,8 @@
   "outputDirectory": "dist",
   "routes": [
     {
-      "src": "/.*",
-      "dest": "/index.html"
+      "src": "^/(?!assets|.*\\.)[^.]*$",
+      "destination": "/index.html"
     }
   ]
 }
