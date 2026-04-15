@@ -28,7 +28,15 @@ const connectDb = async () => {
         console.log('Attempting MongoDB connection...');
         console.log('Connection string format:', process.env.MONGO_URI.substring(0, 30) + '...');
 
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(process.env.MONGO_URI, {
+            serverSelectionTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 10000,
+            retryWrites: true,
+            w: 'majority',
+            maxPoolSize: 5,
+            waitQueueTimeoutMS: 10000
+        });
 
         isConnecting = false;
         console.log('✓ MongoDB Connected Successfully');
